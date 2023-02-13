@@ -1,3 +1,3 @@
-## Ethernaut Huff
+# Ethernaut Huff
 
 Ethernaut, but in Huff.
