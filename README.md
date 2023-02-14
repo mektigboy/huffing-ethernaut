@@ -34,6 +34,10 @@ make poc-fallback
 make poc-fal1out
 ```
 
+## Recommendation
+
+Install [VSCode Huff](https://marketplace.visualstudio.com/items?itemName=huff-language.huff-language)
+
 ## Warning
 
 The smart contracts in this repository are used to demonstrate vulnerability issues only. Therefore some contracts are vulnerable, some are simplified for minimal, and some contain malicious code. Hence, do not use any source code in your production.
