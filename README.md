@@ -2,22 +2,10 @@
 
 Ethernaut, but in Huff.
 
-## Write-ups
-
-### Fallback
-
-### Fal1out
-
 ## Installation
 
 ```
 forge install
-```
-
-## Test
-
-```
-forge test
 ```
 
 ## PoCs
