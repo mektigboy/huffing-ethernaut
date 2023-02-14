@@ -19,3 +19,11 @@ forge install
 ```
 forge test
 ```
+
+## PoCs
+
+### Fallback
+
+```
+make poc-fallback
+```
