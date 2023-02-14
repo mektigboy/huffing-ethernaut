@@ -7,3 +7,15 @@ Ethernaut, but in Huff.
 ### Fallback
 
 [Huffing Ethernaut: Fallback]()
+
+## Installation
+
+```sh
+forge install
+```
+
+## Test
+
+```sh
+forge test
+```
