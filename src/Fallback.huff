@@ -70,13 +70,16 @@
     lt                              // [bool]
     less_than jumpi                 // []
 
+    stop
+
     great_than:
         0x00 0x00 revert
 
     less_than:
         caller                      // [msg.sender]
         [OWNER_SLOT] sstore         // []   
-      
+
+        stop
 }
 
 #define macro GET_SLOT_FROM_KEY(pointer) = takes(1) returns (1) {
@@ -129,14 +132,20 @@
 /// MACROS ///  
 //////////////
 
-// #define macro WITHDRAW() = takes (0) returns (0) {
-//     [OWNER_SLOT] sload              // [owner]
+#define macro WITHDRAW() = takes (0) returns (0)  {
+    0x00 0x00 0x00 0x00             // [0, 0, 0, 0]
+    address                         // [address, 0, 0, 0, 0]
+    balance                         // [balance, 0, 0, 0, 0]
+    [OWNER_SLOT] sload              // [slot, balance, 0, 0, 0, 0]
+    gas                             // [gas, owner, balance, 0, 0, 0, 0]
+    call                            // [bool]      
+    iszero is_zero jumpi            // []
 
-//     address                         // [address, owner]
-//     balance                         // [balance, owner]
-//     0x00                            // [0, balance, owner]
-//     call                            // [bool]
-// }
+    stop
+    
+    is_zero:
+        0x00 0x00 revert   
+}
 
 ///////////////////
 /// ENTRY POINT ///
@@ -151,7 +160,7 @@
     dup1 __FUNC_SIG(contributions) eq contributionsJump jumpi
     dup1 __FUNC_SIG(getContribution) eq getContributionJump jumpi
     dup1 __FUNC_SIG(contribute) eq contributeJump jumpi
-    // dup1 __FUNC_SIG(withdraw) eq withdrawJump jumpi
+    dup1 __FUNC_SIG(withdraw) eq withdrawJump jumpi
 
     // Revert if the function is not found
     0x00 0x00 revert
@@ -168,6 +177,6 @@
     contributeJump:
         CONTRIBUTE()
 
-    // withdrawJump:
-    //     WITHDRAW()
+    withdrawJump:
+        WITHDRAW()
 }
