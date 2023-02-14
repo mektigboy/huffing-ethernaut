@@ -38,6 +38,13 @@ make poc-fal1out
 
 Install [VSCode Huff](https://marketplace.visualstudio.com/items?itemName=huff-language.huff-language) extension.
 
+## Acknowledgements
+
+This repository is inspired by or directly modified from many sources, primarily:
+
+- [Ethernaut](https://github.com/OpenZeppelin/ethernaut)
+- [Huffmate](https://github.com/pentagonxyz/huffmate)
+
 ## Warning
 
 The smart contracts in this repository are used to demonstrate vulnerability issues only. Therefore some contracts are vulnerable, some are simplified for minimal, and some contain malicious code. Hence, do not use any source code in your production.
