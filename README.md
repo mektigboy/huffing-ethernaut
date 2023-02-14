@@ -36,7 +36,7 @@ make poc-fal1out
 
 ## Recommendation
 
-Install [VSCode Huff](https://marketplace.visualstudio.com/items?itemName=huff-language.huff-language)
+Install [VSCode Huff](https://marketplace.visualstudio.com/items?itemName=huff-language.huff-language) extension.
 
 ## Warning
 
