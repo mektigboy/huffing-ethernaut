@@ -26,10 +26,14 @@
 /// @dev Reverts if the caller is not the owner
 #define macro ONLY_OWNER() = takes (0) returns (0) {
     caller                          // [msg.sender]
-    [OWNER] sload                   // [owner, msg.sender]
+    [OWNER_SLOT] sload                   // [owner, msg.sender]
     eq                              // [bool]
-    iszero                          // []
-    0x00 0x00 revert                
+    authed jumpi
+
+    // Revert if the caller is not the owner
+    0x00 0x00 revert
+
+    authed:                    
 }
 
 /////////////////////
@@ -133,6 +137,8 @@
 //////////////
 
 #define macro WITHDRAW() = takes (0) returns (0)  {
+    ONLY_OWNER()
+
     0x00 0x00 0x00 0x00             // [0, 0, 0, 0]
     address                         // [address, 0, 0, 0, 0]
     balance                         // [balance, 0, 0, 0, 0]
@@ -142,7 +148,7 @@
     iszero is_zero jumpi            // []
 
     stop
-    
+
     is_zero:
         0x00 0x00 revert   
 }
@@ -162,6 +168,18 @@
     dup1 __FUNC_SIG(contribute) eq contributeJump jumpi
     dup1 __FUNC_SIG(withdraw) eq withdrawJump jumpi
 
+    // Jump into the receive function if `msg.value` is not zero
+    0x00                            // [0]
+    callvalue                       // [msg.value, 0]
+    gt                              // [bool]
+    0x00                            // [0, bool]
+    caller                          // [msg.sender, 0, bool]
+    GET_SLOT_FROM_KEY(0x00)         // [slot, 0, bool]
+    sload                           // [contribution, 0, bool]
+    gt                              // [bool, bool]
+    and                             // []
+    receive jumpi
+
     // Revert if the function is not found
     0x00 0x00 revert
 
@@ -179,4 +197,16 @@
 
     withdrawJump:
         WITHDRAW()
+
+    receive:
+        RECEIVE()
+}
+
+///////////////
+/// RECEIVE ///
+///////////////
+
+#define macro RECEIVE() = {
+    caller                      // [msg.sender]
+    [OWNER_SLOT] sstore         // []   
 }
