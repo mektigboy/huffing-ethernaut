@@ -1,0 +1,59 @@
+/// @title Fallout
+/// @notice SPDX-License-Identifier: MIT
+/// @author mektigboy
+
+/////////////////
+/// INTERFACE ///
+/////////////////
+
+#define function allocations(address) nonpayable returns (uint256)
+#define function owner() nonpayable returns (address)
+#define function Fal1out() payable returns ()
+#define function allocate() payable returns ()
+#define function sendAllocation(address) nonpayable returns ()
+#define function collectAllocations() nonpayable returns ()
+#define function allocatorBalance() view returns (uint256)
+
+///////////////
+/// STORAGE ///
+///////////////
+
+#define constant OWNER_SLOT = FREE_STORAGE_POINTER()
+
+/////////////////
+/// MODIFIERS ///
+/////////////////
+
+/// @notice Modifier to check if the caller is the owner
+/// @dev Reverts if the caller is not the owner
+#define macro ONLY_OWNER() = takes (0) returns (0) {
+    caller                          // [msg.sender]
+    [OWNER_SLOT]                    // [slot, msg.sender]
+    sload                           // [owner, msg.sender]
+    eq                              // [bool]
+    authed                          // []
+    jumpi
+
+    // Revert if the caller is not the owner
+    0x00                            // [0]
+    0x00                            // [0, 0]
+    revert
+
+    authed:                    
+}
+
+//////////////
+/// MACROS ///
+//////////////
+
+#define macro GET_SLOT_FROM_KEY(pointer) = takes(1) returns (1) {
+    // Input stack: [key]
+    // Load the data into memory and hash it, while preserving the memory location
+    <pointer>                       // [<pointer>, key]
+    mstore                          // []
+
+    // Hash the data, generating a key
+    0x20                            // [32]
+    <pointer>                       // [<pointer>, 32]
+    sha3                            // [slot]
+}
