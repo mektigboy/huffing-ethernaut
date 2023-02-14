@@ -10,12 +10,12 @@ Ethernaut, but in Huff.
 
 ## Installation
 
-```sh
+```
 forge install
 ```
 
 ## Test
 
-```sh
+```
 forge test
 ```
