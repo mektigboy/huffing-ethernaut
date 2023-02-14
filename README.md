@@ -6,7 +6,7 @@ Ethernaut, but in Huff.
 
 ### Fallback
 
-[Huffing Ethernaut: Fallback]()
+### Fal1out
 
 ## Installation
 
@@ -26,6 +26,12 @@ forge test
 
 ```
 make poc-fallback
+```
+
+### Fal1out
+
+```
+make poc-fal1out
 ```
 
 ## Warning
