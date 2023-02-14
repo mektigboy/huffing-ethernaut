@@ -7,7 +7,7 @@
 /////////////////
 
 #define function contributions(address) nonpayable returns (uint256)
-#define function owner() view returns (address)
+#define function owner() nonpayable returns (address)
 #define function contribute() payable returns ()
 #define function getContribution() nonpayable returns (uint256)
 #define function withdraw() nonpayable returns ()
@@ -26,42 +26,82 @@
 /// @dev Reverts if the caller is not the owner
 #define macro ONLY_OWNER() = takes (0) returns (0) {
     caller                          // [msg.sender]
-    [OWNER_SLOT] sload                   // [owner, msg.sender]
+    [OWNER_SLOT]                    // [slot, msg.sender]
+    sload                           // [owner, msg.sender]
     eq                              // [bool]
-    authed jumpi
+    authed                          // []
+    jumpi
 
     // Revert if the caller is not the owner
-    0x00 0x00 revert
+    0x00                            // [0]
+    0x00                            // [0, 0]
+    revert
 
     authed:                    
 }
 
-/////////////////////
-/// CONTRIBUTIONS ///
-/////////////////////
+//////////////
+/// MACROS ///
+//////////////
 
+/// @notice Get the slot from a key
+/// @param {key} [bytes32] - The key
+/// @return {slot} [bytes32] - The slot
+#define macro GET_SLOT_FROM_KEY(pointer) = takes(1) returns (1) {
+    // Input stack: [key]
+    // Load the data into memory and hash it, while preserving the memory location
+    <pointer>                       // [<pointer>, key]
+    mstore                          // []
+
+    // Hash the data, generating a key
+    0x20                            // [32]
+    <pointer>                       // [<pointer>, 32]
+    sha3                            // [slot]
+}
+
+//////////////////////
+/// CONTRACT LOGIC ///
+//////////////////////
+
+/// @notice Get the contribution of an address
+/// @param {key} [bytes32] - The key
+/// @return {contribution} [uint256] - The contribution
 #define macro CONTRIBUTIONS() = takes (0) returns (0) {
     0x04 calldataload               // [key]
     GET_SLOT_FROM_KEY(0x00)         // [slot, key]
     sload                           // [contribution]
-    0x00 mstore                     // []
-    0x20 0x00 return
+    0x00                            // [0, contribution]
+    mstore                          // []
+
+    // Return the contribution
+    0x20                            // [32]
+    0x00                            // [0, 32]
+    return
 }
 
-#define macro GET_CONTRIBUTION() = takes (0) returns (0) {
-    caller                          // [msg.sender]
-    GET_SLOT_FROM_KEY(0x00)         // [slot, msg.sender]
-    sload                           // [contribution]
-    0x00 mstore                     // []
-    0x20 0x00 return
+/// @notice Get the owner of the contract
+/// @return {owner} [address] - The owner of the contract
+#define macro OWNER() = takes (0) returns (0) {
+    [OWNER_SLOT]                    // [slot]
+    sload                           // [owner]
+    0x00                            // [0, owner]       
+    mstore                          // []
+
+    // Return the owner
+    0x20                            // [32]
+    0x00                            // [0, 32]
+    return
 }
 
+/// @notice Contribute to the contract
+/// @dev Reverts if the value is less than 0.001 ETH
 #define macro CONTRIBUTE() = takes (0) returns (0) {
     callvalue                       // [value]
     dup1                            // [value, value]
     0x38d7ea4c68000                 // [100000000000000000, value, value]
     gt                              // [bool, value]
-    great_than jumpi                // [value]
+    great_than                      // [value]
+    jumpi                           
 
     caller                          // [msg.sender, value]
     GET_SLOT_FROM_KEY(0x00)         // [slot, value]
@@ -72,43 +112,68 @@
     GET_SLOT_FROM_KEY(0x00)         // [slot, value]
     sload                           // [contribution, value]
     lt                              // [bool]
-    less_than jumpi                 // []
+    less_than                       // []
+    jumpi
 
     stop
 
+    // Revert if the value is less than 0.001 ETH
     great_than:
-        0x00 0x00 revert
+        0x00                        // [0]
+        0x00                        // [0, 0]
+        revert
 
+    // If the contribution of `msg.sender` is more than the contribution of the owner, set the owner to `msg.sender`
     less_than:
         caller                      // [msg.sender]
-        [OWNER_SLOT] sstore         // []   
+        [OWNER_SLOT]                // [slot, msg.sender]
+        sstore                      // []   
 
         stop
 }
 
-#define macro GET_SLOT_FROM_KEY(pointer) = takes(1) returns (1) {
-    // Input stack: [key]
-    // Load the data into memory and hash it, while preserving the memory location
-    <pointer>                       // [<mem_ptr>, key]
+/// @notice Get the contribution of `msg.sender`
+/// @return {contribution} [uint256] - The contribution
+#define macro GET_CONTRIBUTION() = takes (0) returns (0) {
+    caller                          // [msg.sender]
+    GET_SLOT_FROM_KEY(0x00)         // [slot, msg.sender]
+    sload                           // [contribution]
+    0x00                            // [0, contribution]
     mstore                          // []
 
-    // Hash the data, generating a key
+    // Return the contribution
     0x20                            // [32]
-    <pointer>                       // [<mem_ptr>, 32]
-    sha3                            // [slot]
+    0x00                            // [0, 32]
+    return
 }
 
-/////////////
-/// OWNER ///
-/////////////
+/// @notice Withdraw the balance of the contract
+/// @dev Reverts if the caller is not the owner
+#define macro WITHDRAW() = takes (0) returns (0)  {
+    ONLY_OWNER()
 
-/// @notice Get the owner of the contract
-/// @return {owner} [address] - The owner of the contract
-#define macro OWNER() = takes (0) returns (0) {
-    [OWNER_SLOT] sload              // [owner]
-    0x00 mstore                     // []
-    0x20 0x00 return
+    0x00                            // [0]
+    0x00                            // [0, 0]
+    0x00                            // [0, 0, 0]
+    0x00                            // [0, 0, 0, 0]
+    address                         // [address, 0, 0, 0, 0]
+    balance                         // [balance, 0, 0, 0, 0]
+    [OWNER_SLOT]                    // [slot, balance, 0, 0, 0, 0]
+    sload                           // [owner, balance, 0, 0, 0, 0]
+    gas                             // [gas, owner, balance, 0, 0, 0, 0]
+    call                            // [bool]      
+    iszero                          // [bool]
+    is_zero                         // []
+    jumpi
+
+    stop
+
+    is_zero:
+        0x00                        // [0]
+        0x00                        // [0, 0]
+        revert                      
 }
+
 
 ///////////////////
 /// CONSTRUCTOR ///
@@ -116,59 +181,49 @@
 
 /// @notice Constructor
 #define macro CONSTRUCTOR() = takes (0) returns (0) {
-    0x20                            // [size] - Byte size to copy    
-    0x20 codesize sub               // [offset, size] - Offset in the code to copy from
-    0x00                            // [mem, offset, size] - Offset in memory to copy to
+    0x20                            // [size] - Byte size to copy  
+    0x20                            // [offset, size] - Offset in the code to copy from  
+    codesize                        // [size, offset, size] - Byte size of the code
+    sub                             // [size]
+    0x00                            // [0, size] - Offset in memory to copy to
     codecopy                        // []
 
-    0x00 mload                      // [owner]
-    [OWNER_SLOT] sstore             // []
+    0x00                            // [0]
+    mload                           // [owner]
+    [OWNER_SLOT]                    // [slot, owner]
+    sstore                           // []
 
     0x3e8                           // [1000]
     0xde0b6b3a7640000               // [1000000000000000000, 1000]
-    mul                             // [1000000000000000000000] - 1000 ETH
-    0x00 mload                      // [owner, 1000000000000000000000]
+    mul                             // [1000000000000000000000] - 1000000000000000000 * 1000 = 1000 ETH
+    0x00                            // [0, 1000000000000000000000]
+    mload                           // [owner, 1000000000000000000000]
     GET_SLOT_FROM_KEY(0x00)         // [slot, 1000000000000000000000]
     sstore                          // []
 }
 
-//////////////
-/// MACROS ///  
-//////////////
-
-#define macro WITHDRAW() = takes (0) returns (0)  {
-    ONLY_OWNER()
-
-    0x00 0x00 0x00 0x00             // [0, 0, 0, 0]
-    address                         // [address, 0, 0, 0, 0]
-    balance                         // [balance, 0, 0, 0, 0]
-    [OWNER_SLOT] sload              // [slot, balance, 0, 0, 0, 0]
-    gas                             // [gas, owner, balance, 0, 0, 0, 0]
-    call                            // [bool]      
-    iszero is_zero jumpi            // []
-
-    stop
-
-    is_zero:
-        0x00 0x00 revert   
-}
 
 ///////////////////
 /// ENTRY POINT ///
 ///////////////////
 
-/// @notice Main dispatcher function
+/// @notice Main entry point
 #define macro MAIN() = takes (0) returns (0) {
     // Identify which function is being called
-    pc calldataload 0xE0 shr
+    0x00                            // [0]
+    calldataload                    // [sig, 0]
+    0xE0                            // [224, sig, 0]
+    shr                             // [sel, 0]
 
+    // Jump to the function depending on the selector
     dup1 __FUNC_SIG(owner) eq ownerJump jumpi
     dup1 __FUNC_SIG(contributions) eq contributionsJump jumpi
     dup1 __FUNC_SIG(getContribution) eq getContributionJump jumpi
     dup1 __FUNC_SIG(contribute) eq contributeJump jumpi
     dup1 __FUNC_SIG(withdraw) eq withdrawJump jumpi
 
-    // Jump into the receive function if `msg.value` is not zero
+    // Jump into the receive function if `msg.value` is greater than 0
+    // and the contribution of `msg.sender` is greater than 0
     0x00                            // [0]
     callvalue                       // [msg.value, 0]
     gt                              // [bool]
@@ -177,11 +232,14 @@
     GET_SLOT_FROM_KEY(0x00)         // [slot, 0, bool]
     sload                           // [contribution, 0, bool]
     gt                              // [bool, bool]
-    and                             // []
-    receive jumpi
+    and                             // [bool]
+    receive                         // []
+    jumpi
 
     // Revert if the function is not found
-    0x00 0x00 revert
+    0x00                            // [0]
+    0x00                            // [0, 0]
+    revert                      
 
     ownerJump:
         OWNER()
@@ -206,7 +264,9 @@
 /// RECEIVE ///
 ///////////////
 
+/// @notice Receive function
 #define macro RECEIVE() = {
     caller                      // [msg.sender]
-    [OWNER_SLOT] sstore         // []   
+    [OWNER_SLOT]                // [slot, msg.sender]
+    sstore                      // []   
 }
