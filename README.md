@@ -28,7 +28,7 @@ Install [VSCode Huff](https://marketplace.visualstudio.com/items?itemName=huff-l
 
 ## Acknowledgements
 
-This repository is inspired by or directly modified from many sources, primarily:
+This repository is inspired by or directly modified from the following resources:
 
 - [Ethernaut](https://github.com/OpenZeppelin/ethernaut)
 - [Huffmate](https://github.com/pentagonxyz/huffmate)
