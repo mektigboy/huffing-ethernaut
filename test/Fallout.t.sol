@@ -65,4 +65,43 @@ contract FalloutTest is Test {
 
         assertEq(falloutInterface.allocations(ALICE), 10 ether);
     }
+
+    // function test_sendAllocation() public {
+    //     vm.prank(ALICE);
+    //     falloutInterface.allocate{value: 10 ether}();
+
+    //     assertEq(ALICE.balance, 0 ether);
+
+    //     vm.startPrank(BOB);
+
+    //     vm.expectRevert();
+    //     falloutInterface.sendAllocation(BOB);
+
+    //     vm.stopPrank();
+
+    //     vm.prank(ALICE);
+    //     falloutInterface.sendAllocation(ALICE);
+
+    //     // assertEq(ALICE.balance, 10 ether);
+    // }
+
+    function test_sendAllocation() public {
+        vm.deal(address(falloutInterface), 100 ether);
+
+        assertEq(address(falloutInterface).balance, 100 ether);
+
+        vm.prank(ALICE);
+        falloutInterface.allocate{value: 10 ether}();
+
+        assertEq(address(falloutInterface).balance, 110 ether);
+        assertEq(falloutInterface.allocations(ALICE), 10 ether);
+        assertEq(ALICE.balance, 0 ether);
+
+        vm.expectRevert();
+        falloutInterface.sendAllocation(BOB);
+        
+        falloutInterface.sendAllocation(ALICE);
+
+        assertEq(ALICE.balance, 10 ether);
+    }
 }

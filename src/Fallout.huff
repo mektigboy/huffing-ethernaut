@@ -124,42 +124,33 @@
 
 /// @notice Send the allocation of an address to the address
 /// @param {allocator} [address] - The address to send the allocation to
-#define macro SEND_ALLOCATION() = takes (0) returns (0) {
-    // 0x00 0x00 0x00 0x00          // [0, 0, 0, 0]
-    
-    0x04 calldataload               // [allocator]
+#define macro SEND_ALLOCATION() = takes (0) returns (0) {    
+    0x04                            // [4]
+    calldataload                    // [allocator]
     dup1                            // [allocator, allocator]
-    GET_SLOT_FROM_KEY(0x00)         // [slot, allocator, allocator]
+    GET_SLOT_FROM_KEY(0x00)         // [slot, allocator]
     sload                           // [allocation, allocator]
     dup1                            // [allocation, allocation, allocator]
-    0x00                            // [0, allocation, allocation, allocator]
-    swap1                           // [allocation, 0, allocation, allocator]
-    gt                              // [bool, allocation, allocator]
-    great_than                      // [allocation, allocator]
+    iszero                          // [bool, allocation, allocator]
+    is_zero                         // [allocation, allocator]
     jumpi
-    
-    // Revert if the allocation is 0
-    0x00                            // [0]
-    0x00                            // [0, 0]
-    revert
 
-    // If the allocation is greater than 0, send it
-    // Note: We can optimize this without using swaps, we can bring the zeros from above
-    // I'm doing it this way to make it easier to understand the call
-    great_than:
-        0x00                        // [0]
-        0x00                        // [0, 0]
-        0x00                        // [0, 0, 0]
-        0x00                        // [0, 0, 0, 0]
-        swap4                       // [allocation, 0, 0, 0, 0, allocator]
-        swap1                       // [0, allocation, 0, 0, 0, allocator]
-        swap5                       // [allocator, allocation, 0, 0, 0, 0]
-        gas                         // [gas, allocator, allocation, 0, 0, 0, 0]
-        call                        // [bool]
-        iszero                      // [bool]
-        is_zero                     // []
-        jumpi
+    0x00                            // [0, allocation, allocator]
+    0x00                            // [0, 0, allocation, allocator]
+    0x00                            // [0, 0, 0, allocation, allocator]
+    0x00                            // [0, 0, 0, 0, allocation, allocator]
+    swap4                           // [allocation, 0, 0, 0, 0, allocator]
+    swap1                           // [0, allocation, 0, 0, 0, allocator]
+    swap5                           // [allocator, allocation, 0, 0, 0, 0]
+    gas                             // [gas, allocator, allocation, 0, 0, 0, 0]
+    call                            // [bool]
+    iszero                          // [bool]
+    is_zero                         // []
+    jumpi
 
+    stop
+
+    // Revert if the value is 0
     is_zero:
         0x00                        // [0]
         0x00                        // [0, 0]
