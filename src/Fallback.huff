@@ -64,7 +64,7 @@
 //////////////////////
 
 /// @notice Get the contribution of an address
-/// @param {key} [bytes32] - The key
+/// @param {address} [address] - The address
 /// @return {contribution} [uint256] - The contribution
 #define macro CONTRIBUTIONS() = takes (0) returns (0) {
     0x04 calldataload               // [key]
@@ -94,30 +94,30 @@
 }
 
 /// @notice Contribute to the contract
-/// @dev Reverts if the value is less than 0.001 ETH
+/// @dev Reverts if `msg.value` is less than 0.001 ETH
 #define macro CONTRIBUTE() = takes (0) returns (0) {
-    callvalue                       // [value]
-    dup1                            // [value, value]
-    0x38d7ea4c68000                 // [100000000000000000, value, value]
-    gt                              // [bool, value]
-    great_than                      // [value]
+    callvalue                       // [msg.value]
+    dup1                            // [msg.value, msg.value]
+    0x38d7ea4c68000                 // [100000000000000000, msg.value, msg.value]
+    gt                              // [bool, msg.value]
+    great_than                      // [msg.value]
     jumpi                           
 
-    caller                          // [msg.sender, value]
-    GET_SLOT_FROM_KEY(0x00)         // [slot, value]
+    caller                          // [msg.sender, msg.value]
+    GET_SLOT_FROM_KEY(0x00)         // [slot, msg.value]
     sstore                          // []
 
-    callvalue                       // [value]
-    [OWNER_SLOT] sload              // [slot, value]
-    GET_SLOT_FROM_KEY(0x00)         // [slot, value]
-    sload                           // [contribution, value]
+    callvalue                       // [msg.value]
+    [OWNER_SLOT] sload              // [slot, msg.value]
+    GET_SLOT_FROM_KEY(0x00)         // [slot, msg.value]
+    sload                           // [contribution, msg.value]
     lt                              // [bool]
     less_than                       // []
     jumpi
 
     stop
 
-    // Revert if the value is less than 0.001 ETH
+    // Revert if `msg.value` is less than 0.001 ETH
     great_than:
         0x00                        // [0]
         0x00                        // [0, 0]
@@ -174,7 +174,6 @@
         revert                      
 }
 
-
 ///////////////////
 /// CONSTRUCTOR ///
 ///////////////////
@@ -191,7 +190,7 @@
     0x00                            // [0]
     mload                           // [owner]
     [OWNER_SLOT]                    // [slot, owner]
-    sstore                           // []
+    sstore                          // []
 
     0x3e8                           // [1000]
     0xde0b6b3a7640000               // [1000000000000000000, 1000]
@@ -202,10 +201,9 @@
     sstore                          // []
 }
 
-
-///////////////////
-/// ENTRY POINT ///
-///////////////////
+////////////////////////
+/// MAIN ENTRY POINT ///
+////////////////////////
 
 /// @notice Main entry point
 #define macro MAIN() = takes (0) returns (0) {
@@ -216,10 +214,10 @@
     shr                             // [sel, 0]
 
     // Jump to the function depending on the selector
-    dup1 __FUNC_SIG(owner) eq ownerJump jumpi
     dup1 __FUNC_SIG(contributions) eq contributionsJump jumpi
-    dup1 __FUNC_SIG(getContribution) eq getContributionJump jumpi
+    dup1 __FUNC_SIG(owner) eq ownerJump jumpi
     dup1 __FUNC_SIG(contribute) eq contributeJump jumpi
+     dup1 __FUNC_SIG(getContribution) eq getContributionJump jumpi
     dup1 __FUNC_SIG(withdraw) eq withdrawJump jumpi
 
     // Jump into the receive function if `msg.value` is greater than 0
@@ -241,17 +239,17 @@
     0x00                            // [0, 0]
     revert                      
 
-    ownerJump:
-        OWNER()
-    
     contributionsJump:
         CONTRIBUTIONS()
 
-    getContributionJump:
-        GET_CONTRIBUTION()
+    ownerJump:
+        OWNER()
 
     contributeJump:
         CONTRIBUTE()
+
+    getContributionJump:
+        GET_CONTRIBUTION()
 
     withdrawJump:
         WITHDRAW()
