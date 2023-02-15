@@ -150,7 +150,8 @@
 
     stop
 
-    // Revert if the value is 0
+    // Revert if allocation is 0
+    // Revert if the call failed
     is_zero:
         0x00                        // [0]
         0x00                        // [0, 0]
@@ -177,6 +178,7 @@
 
     stop
 
+    // Revert if call failed
     is_zero:
         0x00                        // [0]
         0x00                        // [0, 0]

