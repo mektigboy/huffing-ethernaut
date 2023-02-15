@@ -61,11 +61,9 @@
     sha3                            // [slot]
 }
 
-
 //////////////////////
 /// CONTRACT LOGIC ///
 ////////////////////// 
-
 
 /// @notice Get the allocation of an address
 /// @param {key} [bytes32] - The key
@@ -96,3 +94,159 @@
     0x00                            // [0, 32]
     return
 }
+
+/// @notice Fal1out function that is being used as the constructor
+/// @dev Sets the owner of the contract to `msg.sender`
+#define macro FAL1OUT() = takes (0) returns (0) {
+    caller                          // [msg.sender]
+    [OWNER_SLOT]                    // [slot, msg.sender]
+    sstore                          // []
+
+    callvalue                       // [msg.value]
+    caller                          // [msg.sender, msg.value]
+    GET_SLOT_FROM_KEY(0x00)         // [slot, msg.value]     
+    sstore                          // []           
+}
+
+/// @notice Allocate funds to `msg.sender`
+#define macro ALLOCATE() = takes (0) returns (0) {
+    callvalue                       // [msg.value]
+    caller                          // [msg.sender]
+    GET_SLOT_FROM_KEY(0x00)         // [slot]
+    sstore                          // []
+}
+
+/// @notice Send the allocation of an address to the address
+/// @param {allocator} [address] - The address to send the allocation to
+#define macro SEND_ALLOCATION() = takes (0) returns (0) {
+    // 0x00 0x00 0x00 0x00          // [0, 0, 0, 0]
+    
+    0x04 calldataload               // [allocator]
+    dup1                            // [allocator, allocator]
+    GET_SLOT_FROM_KEY(0x00)         // [slot, allocator, allocator]
+    sload                           // [allocation, allocator]
+    dup1                            // [allocation, allocation, allocator]
+    0x00                            // [0, allocation, allocation, allocator]
+    swap1                           // [allocation, 0, allocation, allocator]
+    gt                              // [bool, allocation, allocator]
+    great_than                      // [allocation, allocator]
+    jumpi
+    
+    // Revert if the allocation is 0
+    0x00                            // [0]
+    0x00                            // [0, 0]
+    revert
+
+    // If the allocation is greater than 0, send it
+    // Note: We can optimize this without using swaps, we can bring the zeros from above
+    // I'm doing it this way to make it easier to understand the call
+    great_than:
+        0x00                        // [0]
+        0x00                        // [0, 0]
+        0x00                        // [0, 0, 0]
+        0x00                        // [0, 0, 0, 0]
+        swap4                       // [allocation, 0, 0, 0, 0, allocator]
+        swap1                       // [0, allocation, 0, 0, 0, allocator]
+        swap5                       // [allocator, allocation, 0, 0, 0, 0]
+        gas                         // [gas, allocator, allocation, 0, 0, 0, 0]
+        call                        // [bool]
+        iszero                      // [bool]
+        is_zero                     // []
+        jumpi
+
+        stop
+
+    is_zero:
+        0x00                        // [0]
+        0x00                        // [0, 0]
+        revert
+}
+
+/// @notice Collect all allocations
+/// @dev Reverts if the caller is not the owner
+#define macro COLLECT_ALLOCATIONS() = takes (0) returns (0) {
+    ONLY_OWNER()
+
+    0x00                            // [0]
+    0x00                            // [0, 0]
+    0x00                            // [0, 0, 0]
+    0x00                            // [0, 0, 0, 0]
+    address                         // [address, 0, 0, 0, 0]
+    balance                         // [balance, 0, 0, 0, 0]
+    caller                          // [msg.sender, balance, 0, 0, 0, 0]
+    gas                             // [gas, msg.sender, balance, 0, 0, 0, 0]
+    call                            // [bool]
+    iszero                          // [bool]
+    is_zero                         // []
+    jumpi
+
+    stop
+
+    is_zero:
+        0x00                        // [0]
+        0x00                        // [0, 0]
+        revert
+}
+
+/// @notice Get the balance of an allocator
+/// @param {allocator} [address] - The allocator to get the balance of
+#define macro ALLOCATOR_BALANCE() = takes (0) returns (0) {
+    0x04 calldataload               // [allocator]
+    GET_SLOT_FROM_KEY(0x00)         // [slot]
+    sload                           // [balance]
+    0x00                            // [0, balance]
+    mstore                          // []
+
+    // Return the balance
+    0x20                            // [32]
+    0x00                            // [0, 32]
+    return
+}
+
+////////////////////////
+/// MAIN ENTRY POINT ///
+////////////////////////
+
+/// @notice Main entry point
+#define macro MAIN() = takes (0) returns (0) {
+    // Identify which function is being called
+    0x00                            // [0]
+    calldataload                    // [sig, 0]
+    0xE0                            // [224, sig, 0]
+    shr                             // [sel, 0]
+
+    // Jump to the function depending on the selector
+    dup1 __FUNC_SIG(allocations) eq allocationsJump jumpi
+    dup1 __FUNC_SIG(owner) eq ownerJump jumpi
+    dup1 __FUNC_SIG(Fal1out) eq Fal1outJump jumpi
+    dup1 __FUNC_SIG(allocate) eq allocateJump jumpi
+    dup1 __FUNC_SIG(sendAllocation) eq sendAllocationJump jumpi
+    dup1 __FUNC_SIG(collectAllocations) eq collectAllocationsJump jumpi
+    dup1 __FUNC_SIG(allocatorBalance) eq allocatorBalanceJump jumpi
+
+    // Revert if the function is not found
+    0x00                            // [0]
+    0x00                            // [0, 0]
+    revert      
+
+    allocationsJump:
+        ALLOCATIONS()
+
+    ownerJump:
+        OWNER()
+    
+    Fal1outJump:
+        FAL1OUT()
+    
+    allocateJump:
+        ALLOCATE()
+    
+    sendAllocationJump:
+        SEND_ALLOCATION()
+    
+    collectAllocationsJump:
+        COLLECT_ALLOCATIONS()
+    
+    allocatorBalanceJump:
+        ALLOCATOR_BALANCE()
+}   
