@@ -110,10 +110,16 @@
 
 /// @notice Allocate funds to `msg.sender`
 #define macro ALLOCATE() = takes (0) returns (0) {
-    callvalue                       // [msg.value]
     caller                          // [msg.sender]
     GET_SLOT_FROM_KEY(0x00)         // [slot]
+    dup1                            // [slot, slot]
+    sload                           // [allocation, slot]
+    callvalue                       // [msg.value, allocation, slot]
+    add                             // [allocation, slot] 
+    swap1                           // [slot, allocation]     
     sstore                          // []
+
+    stop
 }
 
 /// @notice Send the allocation of an address to the address
@@ -153,8 +159,6 @@
         iszero                      // [bool]
         is_zero                     // []
         jumpi
-
-        stop
 
     is_zero:
         0x00                        // [0]
@@ -201,6 +205,26 @@
     0x20                            // [32]
     0x00                            // [0, 32]
     return
+}
+
+///////////////////
+/// CONSTRUCTOR ///
+///////////////////
+
+/// @notice Constructor
+/// @dev Sets `msg.sender` as the owner
+#define macro CONSTRUCTOR() = takes (0) returns (0) {
+    0x20                            // [size] - Byte size to copy  
+    0x20                            // [offset, size] - Offset in the code to copy from  
+    codesize                        // [size, offset, size] - Byte size of the code
+    sub                             // [size]
+    0x00                            // [0, size] - Offset in memory to copy to
+    codecopy                        // []
+
+    0x00                            // [0]
+    mload                           // [owner]
+    [OWNER_SLOT]                    // [slot, owner]
+    sstore                          // []
 }
 
 ////////////////////////
