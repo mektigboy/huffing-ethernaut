@@ -29,3 +29,4 @@ clean:; forge clean
 ############
 
 poc-fallback:; forge clean && forge test --match-contract Fallback
+poc-fallout:; forge clean && forge test --match-contract Fallout
