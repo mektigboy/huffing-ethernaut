@@ -51,21 +51,17 @@ contract FallbackTest is Test {
         fallbackInterface = IFallback(fallbackAddress);
     }
 
-    function test_owner() public {
-        assertEq(fallbackInterface.owner(), OWNER);
-    }
-
     function test_contributions() public {
         assertEq(fallbackInterface.contributions(OWNER), 1000 ether);
     }
 
-    function test_getContributions() public {
-        vm.prank(OWNER);
-        assertEq(fallbackInterface.getContribution(), 1000 ether);
+    function test_owner() public {
+        assertEq(fallbackInterface.owner(), OWNER);
     }
 
     function test_contribute() public {
         vm.deal(ATTACKER, 10000 ether);
+        
         vm.startPrank(ATTACKER);
 
         vm.expectRevert();
@@ -79,12 +75,20 @@ contract FallbackTest is Test {
         assertEq(fallbackInterface.owner(), ATTACKER);
     }
 
+    function test_getContributions() public {
+        vm.prank(OWNER);
+        assertEq(fallbackInterface.getContribution(), 1000 ether);
+    }
+
     function test_withdraw() public {
         vm.deal(address(fallbackInterface), 10000 ether);
 
+        vm.startPrank(ATTACKER);
+
         vm.expectRevert();
-        vm.prank(ATTACKER);
         fallbackInterface.withdraw();
+
+        vm.stopPrank();
 
         vm.prank(OWNER);
         fallbackInterface.withdraw();

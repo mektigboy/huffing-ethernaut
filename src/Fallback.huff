@@ -64,11 +64,12 @@
 //////////////////////
 
 /// @notice Get the contribution of an address
-/// @param {address} [address] - The address
+/// @param {contributor} [address] - The address of the contributor
 /// @return {contribution} [uint256] - The contribution
 #define macro CONTRIBUTIONS() = takes (0) returns (0) {
-    0x04 calldataload               // [key]
-    GET_SLOT_FROM_KEY(0x00)         // [slot, key]
+    0x04                            // [4]
+    calldataload                    // [key]
+    GET_SLOT_FROM_KEY(0x00)         // [slot]
     sload                           // [contribution]
     0x00                            // [0, contribution]
     mstore                          // []
@@ -99,8 +100,8 @@
     callvalue                       // [msg.value]
     dup1                            // [msg.value, msg.value]
     0x38d7ea4c68000                 // [100000000000000000, msg.value, msg.value]
-    gt                              // [bool, msg.value]
-    great_than                      // [msg.value]
+    gt                              // [bool, msg.value] - (0.001 ETH > msg.value)
+    greater_than                    // [msg.value]
     jumpi                           
 
     caller                          // [msg.sender, msg.value]
@@ -108,9 +109,10 @@
     sstore                          // []
 
     callvalue                       // [msg.value]
-    [OWNER_SLOT] sload              // [slot, msg.value]
+    [OWNER_SLOT]                    // [slot, msg.value]
+    sload                           // [owner, msg.value]
     GET_SLOT_FROM_KEY(0x00)         // [slot, msg.value]
-    sload                           // [contribution, msg.value]
+    sload                           // [contribution, msg.value] - (contribution of the owner < contribution of `msg.sender`)
     lt                              // [bool]
     less_than                       // []
     jumpi
@@ -118,7 +120,7 @@
     stop
 
     // Revert if `msg.value` is less than 0.001 ETH
-    great_than:
+    greater_than:
         0x00                        // [0]
         0x00                        // [0, 0]
         revert
@@ -136,7 +138,7 @@
 /// @return {contribution} [uint256] - The contribution
 #define macro GET_CONTRIBUTION() = takes (0) returns (0) {
     caller                          // [msg.sender]
-    GET_SLOT_FROM_KEY(0x00)         // [slot, msg.sender]
+    GET_SLOT_FROM_KEY(0x00)         // [slot]
     sload                           // [contribution]
     0x00                            // [0, contribution]
     mstore                          // []
@@ -179,6 +181,7 @@
 ///////////////////
 
 /// @notice Constructor
+/// @dev Sets `msg.sender` as the owner
 #define macro CONSTRUCTOR() = takes (0) returns (0) {
     0x20                            // [size] - Byte size to copy  
     0x20                            // [offset, size] - Offset in the code to copy from  
