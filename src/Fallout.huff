@@ -46,6 +46,9 @@
 /// MACROS ///
 //////////////
 
+/// @notice Get the slot from a key
+/// @param {key} [bytes32] - The key
+/// @return {slot} [bytes32] - The slot
 #define macro GET_SLOT_FROM_KEY(pointer) = takes(1) returns (1) {
     // Input stack: [key]
     // Load the data into memory and hash it, while preserving the memory location
@@ -56,4 +59,40 @@
     0x20                            // [32]
     <pointer>                       // [<pointer>, 32]
     sha3                            // [slot]
+}
+
+
+//////////////////////
+/// CONTRACT LOGIC ///
+////////////////////// 
+
+
+/// @notice Get the allocation of an address
+/// @param {key} [bytes32] - The key
+/// @return {allocation} [uint256] - The allocation
+#define macro ALLOCATIONS() = takes (0) returns (0) {
+    0x04 calldataload               // [key]
+    GET_SLOT_FROM_KEY(0x00)         // [slot, key]
+    sload                           // [contribution]
+    0x00                            // [0, contribution]
+    mstore                          // []
+
+    // Return the contribution
+    0x20                            // [32]
+    0x00                            // [0, 32]
+    return
+}
+
+/// @notice Get the owner of the contract
+/// @return {owner} [address] - The owner of the contract
+#define macro OWNER() = takes (0) returns (0) {
+    [OWNER_SLOT]                    // [slot]
+    sload                           // [owner]
+    0x00                            // [0, owner]       
+    mstore                          // []
+
+    // Return the owner
+    0x20                            // [32]
+    0x00                            // [0, 32]
+    return
 }
