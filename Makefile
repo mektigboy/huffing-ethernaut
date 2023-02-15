@@ -28,5 +28,5 @@ clean:; forge clean
 ### POCS ###
 ############
 
-poc-fallback:; forge clean && forge test --match-contract Fallback
-poc-fallout:; forge clean && forge test --match-contract Fallout
+poc-fallback:; forge clean && forge test --match-contract Fallback -vv
+poc-fallout:; forge clean && forge test --match-contract Fallout -vv
