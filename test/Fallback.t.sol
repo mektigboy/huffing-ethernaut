@@ -61,7 +61,7 @@ contract FallbackTest is Test {
 
     function test_contribute() public {
         vm.deal(ATTACKER, 10000 ether);
-        
+
         vm.startPrank(ATTACKER);
 
         vm.expectRevert();
@@ -208,6 +208,7 @@ contract FallbackTest is Test {
         );
         if (!success) revert CallFailed();
         fallbackInterface.withdraw();
+
         vm.stopPrank();
 
         console.log(
