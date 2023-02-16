@@ -1,0 +1,165 @@
+/// @title CoinFlip
+/// @notice SPDX-License-Identifier: MIT
+/// @author mektigboy
+
+/////////////////
+/// INTERFACE ///
+/////////////////
+
+#define function consecutiveWins() view returns (uint256)
+#define function flip(bool) nonpayable returns (bool)
+#define function lastHash() view returns (uint256)
+
+///////////////
+/// STORAGE ///
+///////////////
+
+#define constant OWNER_SLOT = FREE_STORAGE_POINTER()
+#define constant CONSECUTIVE_WINS_SLOT = FREE_STORAGE_POINTER()
+#define constant LAST_HASH_SLOT = FREE_STORAGE_POINTER()
+#define constant FACTOR = 0x8000000000000000000000000000000000000000000000000000000000000000
+
+//////////////////////
+/// CONTRACT LOGIC ///
+//////////////////////
+
+/// @notice Get the number of consecutive wins
+/// @return The number of consecutive wins
+#define macro CONSECUTIVE_WINS() = takes (0) returns (0) {
+    [CONSECUTIVE_WINS_SLOT]         // [slot]
+    sload                           // [consecutiveWins]
+    0x00                            // [0, consecutiveWins]       
+    mstore                          // []
+
+    // Return the number of consecutive wins
+    0x20                            // [32]
+    0x00                            // [0, 32]
+    return
+}
+
+///////////////////
+/// ! TEMPORARY ///
+///////////////////
+
+#define macro LAST_HASH() = takes (0) returns (0) {
+    [LAST_HASH_SLOT]                // [slot]
+    sload                           // [lastHash]
+    0x00                            // [0, lastHash]       
+    mstore                          // []
+
+    0x20                            // [32]
+    0x00                            // [0, 32]
+    return
+}
+
+/// @notice Flip the coin
+/// @param {guess} [bool] - The guess
+/// @return {result} [bool] - The result
+#define macro FLIP() = takes (0) returns (0) {
+    0x01                            // [1]
+    number                          // [block.number, 1]
+    sub                             // [result]
+    blockhash                       // [hash]
+    [LAST_HASH_SLOT]                // [slot, hash]
+    sload                           // [lastHash, hash] 
+    eq                              // [bool]
+    is_equal                        // []
+    jumpi
+
+    0x01
+    [LAST_HASH_SLOT]
+    sstore
+    
+    stop
+    // eq                              // [bool]
+    // is_equal                        // []
+    // jumpi
+
+    // 0x01                            // [1]
+    // number                          // [block.number, 1]
+    // sub                             // [result]
+    // blockhash                       // [hash]
+    // [LAST_HASH_SLOT]                // [slot, hash]
+    // sstore
+    
+    // 0x01                            // [1]
+    // number                          // [block.number, 1]
+    // sub                             // [result]
+    // blockhash                       // [hash]
+    // dup1                            // [hash, hash]
+    // [LAST_HASH_SLOT]                // [slot, hash, hash]
+    // dup1                            // [slot, slot, hash, hash]
+    // swap2                           // [hash, slot, slot, hash]
+    // swap1                           // [slot, hash, slot, hash]       
+    // sload                           // [lastHash, hash, slot, hash]
+    // eq                              // [bool, slot, hash]
+    // is_equal                        // [slot, hash]
+    // jumpi
+
+    // sstore                          // []
+
+    is_equal:
+        0x00                        // [0]
+        0x00                        // [0, 0]
+        revert
+}
+
+///////////////////
+/// CONSTRUCTOR ///
+///////////////////
+
+/// @notice Constructor
+/// @dev Sets `msg.sender` as the owner
+/// @dev Sets the number of consecutive wins to 0
+#define macro CONSTRUCTOR() = takes (0) returns (0) {
+    0x20                            // [size] - Byte size to copy  
+    0x20                            // [offset, size] - Offset in the code to copy from  
+    codesize                        // [size, offset, size] - Byte size of the code
+    sub                             // [size]
+    0x00                            // [0, size] - Offset in memory to copy to
+    codecopy                        // []
+    
+    0x00                            // [0]
+    mload                           // [owner]
+    [OWNER_SLOT]                    // [slot, owner]
+    sstore                          // []
+
+    // Set the number of consecutive wins to 0
+    0x00                            // [0]
+    [CONSECUTIVE_WINS_SLOT]         // [slot, 0]
+    sstore                          // []
+}
+
+////////////////////////
+/// MAIN ENTRY POINT ///
+////////////////////////
+
+/// @notice Main entry point
+#define macro MAIN() = takes (0) returns (0) {
+    // Identify which function is being called
+    0x00                            // [0]
+    calldataload                    // [sig, 0]
+    0xE0                            // [224, sig, 0]
+    shr                             // [sel, 0]
+
+    // Jump to the function depending on the selector
+    dup1 __FUNC_SIG(consecutiveWins) eq consecutiveWinsJump jumpi
+    dup1 __FUNC_SIG(flip) eq flipJump jumpi
+    dup1 __FUNC_SIG(lastHash) eq lastHashJump jumpi
+
+    // Revert if the function is not found
+    0x00                            // [0]
+    0x00                            // [0, 0]
+    revert
+
+    // Function jump destinations
+
+    consecutiveWinsJump:
+        CONSECUTIVE_WINS()
+    
+    flipJump:
+        FLIP()
+
+    lastHashJump:
+        LAST_HASH()
+}
