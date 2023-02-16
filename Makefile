@@ -30,3 +30,4 @@ clean:; forge clean
 
 poc-fallback:; forge clean && forge test --match-contract Fallback -vv
 poc-fallout:; forge clean && forge test --match-contract Fallout -vv
+poc-coinflip:; forge clean && forge test --match-contract CoinFlip -vv
