@@ -4,7 +4,7 @@ Ethernaut, but in Huff.
 
 ## Installation
 
-```
+``` sh
 forge install
 ```
 
@@ -12,14 +12,20 @@ forge install
 
 ### Fallback
 
-```
+```sh
 make poc-fallback
 ```
 
 ### Fal1out
 
-```
+```sh
 make poc-fal1out
+```
+
+### CoinFlip
+
+```sh
+make poc-coinflip
 ```
 
 ## Recommendation
