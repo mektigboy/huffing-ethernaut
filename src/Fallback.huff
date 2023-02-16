@@ -170,6 +170,7 @@
 
     stop
 
+    // Revert if the call failed
     is_zero:
         0x00                        // [0]
         0x00                        // [0, 0]
@@ -220,7 +221,7 @@
     dup1 __FUNC_SIG(contributions) eq contributionsJump jumpi
     dup1 __FUNC_SIG(owner) eq ownerJump jumpi
     dup1 __FUNC_SIG(contribute) eq contributeJump jumpi
-     dup1 __FUNC_SIG(getContribution) eq getContributionJump jumpi
+    dup1 __FUNC_SIG(getContribution) eq getContributionJump jumpi
     dup1 __FUNC_SIG(withdraw) eq withdrawJump jumpi
 
     // Jump into the receive function if `msg.value` is greater than 0
@@ -240,7 +241,9 @@
     // Revert if the function is not found
     0x00                            // [0]
     0x00                            // [0, 0]
-    revert                      
+    revert       
+
+    // Function jump destinations
 
     contributionsJump:
         CONTRIBUTIONS()
