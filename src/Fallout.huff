@@ -246,6 +246,8 @@
     0x00                            // [0, 0]
     revert      
 
+    // Function jump destinations
+
     allocationsJump:
         ALLOCATIONS()
 

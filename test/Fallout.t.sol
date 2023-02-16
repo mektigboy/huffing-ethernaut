@@ -27,8 +27,6 @@ contract FalloutTest is Test {
 
     IFallout falloutInterface;
 
-    error CallFailed();
-
     function setUp() public {
         vm.deal(ALICE, 10 ether);
         vm.deal(BOB, 10 ether);
