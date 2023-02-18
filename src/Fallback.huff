@@ -12,6 +12,13 @@
 #define function getContribution() nonpayable returns (uint256)
 #define function withdraw() nonpayable returns ()
 
+//////////////
+/// ERRORS ///
+//////////////
+
+#define constant ONLY_OWNER = 0x63616c6c6572206973206e6f7420746865206f776e6572000000000000000000
+#define constant ONLY_OWNER_LENGTH = 0x17
+
 ///////////////
 /// STORAGE ///
 ///////////////
@@ -33,8 +40,8 @@
     jumpi
 
     // Revert if the caller is not the owner
-    0x00                            // [0]
-    0x00                            // [0, 0]
+    [ONLY_OWNER]                    // [error]
+    [ONLY_OWNER_LENGTH]             // [length, error]
     revert
 
     authed:                    
@@ -244,7 +251,6 @@
     revert       
 
     // Function jump destinations
-
     contributionsJump:
         CONTRIBUTIONS()
 
