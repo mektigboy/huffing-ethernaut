@@ -34,7 +34,7 @@ make poc-coinflip
 make poc-telephone
 ```
 
-### Token
+### Token ***
 
 ```sh
 make poc-telephone
