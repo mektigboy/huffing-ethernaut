@@ -32,7 +32,11 @@ contract CoinFlip is Test {
     function test_flip() public {
         assertEq(coinFlipInterface.lastHash(), 0);
 
-        coinFlipInterface.flip(true);
+        vm.roll(16656420);
+
+        bytes32 blockHash = coinFlipInterface.flip(true);
+
+        console.log("BLOCKHASH: ", uint256(blockHash));
 
         // assertEq(coinFlipInterface.lastHash(), 0);
 

@@ -56,51 +56,36 @@
 /// @param {guess} [bool] - The guess
 /// @return {result} [bool] - The result
 #define macro FLIP() = takes (0) returns (0) {
-    0x01                            // [1]
-    number                          // [block.number, 1]
-    sub                             // [result]
-    blockhash                       // [hash]
-    [LAST_HASH_SLOT]                // [slot, hash]
-    sload                           // [lastHash, hash] 
-    eq                              // [bool]
-    is_equal                        // []
+    0x01                           // [1]
+    number                         // [blockNumber, 1]
+    sub                            // [blockNumber]
+    blockhash                      // [blockHash]
+    dup1                           // [blockHash, blockHash]
+    dup1                           // [blockNumber, blockHash, blockHash]
+    [LAST_HASH_SLOT]               // [slot, blockHash, blockHash, blockHash]
+    dup1                           // [slot, slot, blockHash, blockHash, blockHash]
+    sload                          // [lastHash, slot, blockHash, blockHash, blockHash]
+    swap1                          // [slot, lastHash, blockHash, blockHash, blockHash
+    swap2                          // [blockHash, lastHash, slot, blockHash, blockHash]
+    eq                             // [bool, slot, blockHash, blockHash]
+    is_equal                       // [slot, blockHash, blockHash]
     jumpi
 
-    0x01
-    [LAST_HASH_SLOT]
-    sstore
-    
-    stop
-    // eq                              // [bool]
-    // is_equal                        // []
-    // jumpi
+    sstore                         // [blockHash]
+    [FACTOR]                       // [factor, blockHash]
+    div                            // [result]
 
-    // 0x01                            // [1]
-    // number                          // [block.number, 1]
-    // sub                             // [result]
-    // blockhash                       // [hash]
-    // [LAST_HASH_SLOT]                // [slot, hash]
-    // sstore
-    
-    // 0x01                            // [1]
-    // number                          // [block.number, 1]
-    // sub                             // [result]
-    // blockhash                       // [hash]
-    // dup1                            // [hash, hash]
-    // [LAST_HASH_SLOT]                // [slot, hash, hash]
-    // dup1                            // [slot, slot, hash, hash]
-    // swap2                           // [hash, slot, slot, hash]
-    // swap1                           // [slot, hash, slot, hash]       
-    // sload                           // [lastHash, hash, slot, hash]
-    // eq                              // [bool, slot, hash]
-    // is_equal                        // [slot, hash]
-    // jumpi
+    // stop
 
-    // sstore                          // []
+    0x00                           // [0, blockHash]
+    mstore                         // []
+    0x20
+    0x00
+    return
 
     is_equal:
-        0x00                        // [0]
-        0x00                        // [0, 0]
+        0x00                       // [0]
+        0x00                       // [0, 0]
         revert
 }
 
