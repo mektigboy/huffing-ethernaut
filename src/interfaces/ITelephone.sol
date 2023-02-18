@@ -6,6 +6,6 @@ pragma solidity ^0.8.0;
 /// @author mektigboy
 interface ITelephone {
     function owner() external view returns (address);
-    
+
     function changeOwner(address) external;
 }

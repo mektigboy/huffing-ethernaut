@@ -6,6 +6,7 @@
 /// INTERFACE ///
 /////////////////
 
+#define function owner() view returns (address)
 #define function changeOwner(address) nonpayable returns ()
 
 ///////////////
@@ -35,7 +36,23 @@
 /// @notice Get the number of consecutive wins
 /// @param {owner} [address] - The new owner
 #define macro CHANGE_OWNER() = takes (0) returns (0) {
+    origin                         // [tx.origin]   
+    caller                         // [tx.origin, msg.sender]
+    eq                             // [tx.origin == msg.sender]
+    is_equal
+    jumpi
 
+    0x04                            // [4]
+    calldataload                    // [owner]
+    [OWNER_SLOT]                    // [slot, owner]
+    sstore
+
+    stop
+
+    is_equal:
+        0x00                        // [0, tx.origin == msg.sender]
+        0x00                        // [0, 0, tx.origin == msg.sender]
+        revert
 }
 
 ///////////////////
@@ -72,9 +89,17 @@
 
     // Jump to the function depending on the selector
     dup1 __FUNC_SIG(owner) eq ownerJump jumpi
+    dup1 __FUNC_SIG(changeOwner) eq changeOwnerJump jumpi
+
+    // Revert if the function is not found
+    0x00                            // [0]
+    0x00                            // [0, 0]
+    revert
 
     // Function jump destinations
-
     ownerJump:
         OWNER()
+
+    changeOwnerJump:
+        CHANGE_OWNER()
 }

