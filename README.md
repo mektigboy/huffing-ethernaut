@@ -22,13 +22,19 @@ make poc-fallback
 make poc-fal1out
 ```
 
-### CoinFlip *
+### CoinFlip ***
 
 ```sh
 make poc-coinflip
 ```
 
 ### Telephone
+
+```sh
+make poc-telephone
+```
+
+### Token
 
 ```sh
 make poc-telephone
