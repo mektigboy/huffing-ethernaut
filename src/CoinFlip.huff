@@ -72,13 +72,14 @@
     jumpi
 
     sstore                         // [blockHash]
+    [FACTOR]
     [FACTOR]                       // [factor, blockHash]
     div                            // [result]
-
-    // stop
-
-    0x00                           // [0, blockHash]
-    mstore                         // []
+    0x01                           // [1, result]
+    eq                             // [bool]
+    is_one                         // []
+    jumpi
+    
     0x20
     0x00
     return
@@ -87,6 +88,16 @@
         0x00                       // [0]
         0x00                       // [0, 0]
         revert
+
+    is_one:
+        0x01
+        0x00
+        mstore
+        jumpi
+        // 0x20
+        // 0x00
+        // return
+
 }
 
 ///////////////////
@@ -138,7 +149,6 @@
     revert
 
     // Function jump destinations
-
     consecutiveWinsJump:
         CONSECUTIVE_WINS()
     
