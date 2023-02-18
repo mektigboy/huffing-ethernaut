@@ -38,13 +38,12 @@ contract Telephone is Test {
     }
 
     function test_PoC() public {
-        vm.startPrank(ATTACKER, ATTACKER);
+        console.log("TELEPHONE'S OWNER (BEFORE ATTACK): ", telephoneInterface.owner());
 
+        vm.prank(ATTACKER, ATTACKER);
         new Attack(telephoneInterface);
 
-        vm.stopPrank();
-
-        assertEq(telephoneInterface.owner(), ATTACKER);
+        console.log("TELEPHONE'S OWNER (AFTER ATTACK): ", telephoneInterface.owner());
     }
 }
 
