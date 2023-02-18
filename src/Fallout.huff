@@ -69,7 +69,8 @@
 /// @param {key} [bytes32] - The key
 /// @return {allocation} [uint256] - The allocation
 #define macro ALLOCATIONS() = takes (0) returns (0) {
-    0x04 calldataload               // [key]
+    0x04                            // [4]
+    calldataload                    // [key]
     GET_SLOT_FROM_KEY(0x00)         // [slot, key]
     sload                           // [contribution]
     0x00                            // [0, contribution]
@@ -188,7 +189,8 @@
 /// @notice Get the balance of an allocator
 /// @param {allocator} [address] - The allocator to get the balance of
 #define macro ALLOCATOR_BALANCE() = takes (0) returns (0) {
-    0x04 calldataload               // [allocator]
+    0x04                            // [4]
+    calldataload                    // [allocator]
     GET_SLOT_FROM_KEY(0x00)         // [slot]
     sload                           // [balance]
     0x00                            // [0, balance]
