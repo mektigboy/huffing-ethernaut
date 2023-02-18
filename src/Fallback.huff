@@ -213,7 +213,7 @@
 #define macro MAIN() = takes (0) returns (0) {
     // Identify which function is being called
     0x00                            // [0]
-    calldataload                    // [sig, 0]
+    calldataload                    // [sig]
     0xE0                            // [224, sig, 0]
     shr                             // [sel, 0]
 
