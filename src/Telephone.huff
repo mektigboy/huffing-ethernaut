@@ -1,0 +1,80 @@
+/// @title Telephone
+/// @notice SPDX-License-Identifier: MIT
+/// @author mektigboy
+
+/////////////////
+/// INTERFACE ///
+/////////////////
+
+#define function changeOwner(address) nonpayable returns ()
+
+///////////////
+/// STORAGE ///
+///////////////
+
+#define constant OWNER_SLOT = FREE_STORAGE_POINTER()
+
+//////////////////////
+/// CONTRACT LOGIC ///
+//////////////////////
+
+/// @notice Get the owner of the contract
+/// @return {owner} [address] - The owner of the contract
+#define macro OWNER() = takes (0) returns (0) {
+    [OWNER_SLOT]                    // [slot]
+    sload                           // [owner]
+    0x00                            // [0, owner]       
+    mstore                          // []
+
+    // Return the owner
+    0x20                            // [32]
+    0x00                            // [0, 32]
+    return
+}
+
+/// @notice Get the number of consecutive wins
+/// @param {owner} [address] - The new owner
+#define macro CHANGE_OWNER() = takes (0) returns (0) {
+
+}
+
+///////////////////
+/// CONSTRUCTOR ///
+///////////////////
+
+/// @notice Constructor
+/// @dev Sets `msg.sender` as the owner
+#define macro CONSTRUCTOR() = takes (0) returns (0) {
+    0x20                            // [size] - Byte size to copy  
+    0x20                            // [offset, size] - Offset in the code to copy from  
+    codesize                        // [size, offset, size] - Byte size of the code
+    sub                             // [size]
+    0x00                            // [0, size] - Offset in memory to copy to
+    codecopy                        // []
+    
+    0x00                            // [0]
+    mload                           // [owner]
+    [OWNER_SLOT]                    // [slot, owner]
+    sstore                          // []
+}
+
+////////////////////////
+/// MAIN ENTRY POINT ///
+////////////////////////
+
+/// @notice Main entry point
+#define macro MAIN() = takes (0) returns (0) {
+    // Identify which function is being called
+    0x00                            // [0]
+    calldataload                    // [sig, 0]
+    0xE0                            // [224, sig, 0]
+    shr                             // [sel, 0]
+
+    // Jump to the function depending on the selector
+    dup1 __FUNC_SIG(owner) eq ownerJump jumpi
+
+    // Function jump destinations
+
+    ownerJump:
+        OWNER()
+}
