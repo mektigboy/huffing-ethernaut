@@ -71,7 +71,7 @@
 //////////////////////
 
 /// @notice Get the contribution of an address
-/// @param {contributor} [address] - The address of the contributor
+/// @param {contributor} [address] - The contributor
 /// @return {contribution} [uint256] - The contribution
 #define macro CONTRIBUTIONS() = takes (0) returns (0) {
     0x04                            // [4]
@@ -88,7 +88,7 @@
 }
 
 /// @notice Get the owner of the contract
-/// @return {owner} [address] - The owner of the contract
+/// @return {owner} [address] - The owner
 #define macro OWNER() = takes (0) returns (0) {
     [OWNER_SLOT]                    // [slot]
     sload                           // [owner]
