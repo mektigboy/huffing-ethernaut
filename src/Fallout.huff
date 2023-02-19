@@ -83,7 +83,7 @@
 }
 
 /// @notice Get the owner of the contract
-/// @return {owner} [address] - The owner of the contract
+/// @return {owner} [address] - The owner
 #define macro OWNER() = takes (0) returns (0) {
     [OWNER_SLOT]                    // [slot]
     sload                           // [owner]
@@ -124,7 +124,7 @@
 }
 
 /// @notice Send the allocation of an address to the address
-/// @param {allocator} [address] - The address to send the allocation to
+/// @param {allocator} [address] - The allocator
 #define macro SEND_ALLOCATION() = takes (0) returns (0) {    
     0x04                            // [4]
     calldataload                    // [allocator]
@@ -187,7 +187,7 @@
 }
 
 /// @notice Get the balance of an allocator
-/// @param {allocator} [address] - The allocator to get the balance of
+/// @param {allocator} [address] - The allocator
 #define macro ALLOCATOR_BALANCE() = takes (0) returns (0) {
     0x04                            // [4]
     calldataload                    // [allocator]
