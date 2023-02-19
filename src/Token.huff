@@ -1,0 +1,164 @@
+/// @title Token
+/// @notice SPDX-License-Identifier: MIT
+/// @author mektigboy
+
+/////////////////
+/// INTERFACE ///
+/////////////////
+
+#define function totalSupply() view returns (uint256)
+#define function transfer(address,address) nonpayable returns (bool)
+#define function balanceOf(address) view returns (uint256)
+
+///////////////
+/// STORAGE ///
+///////////////
+
+#define constant OWNER_SLOT = FREE_STORAGE_POINTER()
+#define constant TOTAL_SUPPLY_SLOT = FREE_STORAGE_POINTER()
+
+//////////////
+/// MACROS ///
+//////////////
+
+/// @notice Get the slot from a key
+/// @param {key} [bytes32] - The key
+/// @return {slot} [bytes32] - The slot
+#define macro GET_SLOT_FROM_KEY(pointer) = takes(1) returns (1) {
+    // Input stack: [key]
+    // Load the data into memory and hash it, while preserving the memory location
+    <pointer>                       // [<pointer>, key]
+    mstore                          // []
+
+    // Hash the data, generating a key
+    0x20                            // [32]
+    <pointer>                       // [<pointer>, 32]
+    sha3                            // [slot]
+}
+
+//////////////////////
+/// CONTRACT LOGIC ///
+//////////////////////
+
+/// @notice Get the total supply
+/// @return {totalSupply} [uint256] - The total supply
+#define macro TOTAL_SUPPLY() = takes (0) returns (0) {
+    [TOTAL_SUPPLY_SLOT]             // [slot]
+    sload                           // [totalSupply]
+    0x00                            // [0, totalSupply]
+    mstore                          // []
+
+    // Return the total supply
+    0x20                            // [32]
+    0x00                            // [0, 32]
+    return
+}
+
+/// @notice Transfer tokens
+/// @param {to} [address] - The recipient
+/// @param {value} [uint256] - The amount
+#define macro TRANSFER() = takes (0) returns (0) {
+    caller                          // [msg.sender]
+    GET_SLOT_FROM_KEY(0x00)         // [slot]
+    sload                           // [balance]
+    0x24                            // [36]
+    calldataload                    // [value]
+    sub                             // [balance - value]
+    eq                              // [bool]
+    is_equal                        // []
+    jumpi
+    
+    0x24                            // [36]
+    calldataload                    // [to]
+    0x04                            // [4]
+    calldataload                    // [value, to]
+
+    // Revert if the transfer is not valid
+    is_equal:
+        0x00                        // [0]
+        0x00                        // [0, 0]
+        revert
+}
+
+/// @notice Get the balance of an account
+/// @param {account} [address] - The account
+/// @return {balance} [uint256] - The balance
+#define macro BALANCE_OF() = takes (0) returns (0) {
+    0x04                            // [4]
+    calldataload                    // [account]
+    GET_SLOT_FROM_KEY(0x00)         // [slot]
+    sload                           // [balance]
+    0x00                            // [0, balance]
+    mstore                          // []
+
+    // Return the balance
+    0x20                            // [32]
+    0x00                            // [0, 32]
+    return
+}
+
+///////////////////
+/// CONSTRUCTOR ///
+///////////////////
+
+/// @notice Constructor
+/// @param {initialSupply} [uint256] - The initial supply
+/// @dev Sets `msg.sender` as the owner
+#define macro CONSTRUCTOR() = takes (0) returns (0) {
+    0x20                            // [size] - Byte size to copy  
+    0x20                            // [offset, size] - Offset in the code to copy from  
+    codesize                        // [size, offset, size] - Byte size of the code
+    sub                             // [size]
+    0x00                            // [0, size] - Offset in memory to copy to
+    codecopy                        // []
+
+    0x00                            // [0]
+    mload                           // [owner]
+    [OWNER_SLOT]                    // [slot, owner]
+    sstore
+
+    // Set balances[msg.sender] = totalSupply =  initialSupply
+    0x04                            // [4]
+    calldataload                    // [initialSupply]
+    [TOTAL_SUPPLY_SLOT]             // [slot, initialSupply]
+    sstore                          // []
+    // dup1                            // [initialSupply, initialSupply]
+    // [TOTAL_SUPPLY_SLOT]             // [slot, initialSupply, initialSupply]
+    // sstore                          // [initialSupply]
+    // caller                          // [msg.sender, initialSupply]
+    // GET_SLOT_FROM_KEY(0x00)         // [slot, initialSupply]
+    // sstore                          // []
+}
+
+////////////////////////
+/// MAIN ENTRY POINT ///
+////////////////////////
+
+/// @notice Main entry point
+#define macro MAIN() = takes (0) returns (0) {
+    // Identify which function is being called
+    0x00                            // [0]
+    calldataload                    // [sig]
+    0xE0                            // [224, sig, 0]
+    shr                             // [sel, 0]
+
+    // Jump to the function depending on the selector
+    dup1 __FUNC_SIG(totalSupply) eq totalSupplyJump jumpi
+    dup1 __FUNC_SIG(transfer) eq transferJump jumpi
+    dup1 __FUNC_SIG(balanceOf) eq balanceOfJump jumpi
+
+     // Revert if the function is not found
+    0x00                            // [0]
+    0x00                            // [0, 0]
+    revert
+
+    // Function jump destinations 
+    totalSupplyJump:
+        TOTAL_SUPPLY()
+
+    transferJump:
+        TRANSFER()
+
+    balanceOfJump:
+        BALANCE_OF()
+}
