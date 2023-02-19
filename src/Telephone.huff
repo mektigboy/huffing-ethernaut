@@ -20,7 +20,7 @@
 //////////////////////
 
 /// @notice Get the owner of the contract
-/// @return {owner} [address] - The owner of the contract
+/// @return {owner} [address] - The owner
 #define macro OWNER() = takes (0) returns (0) {
     [OWNER_SLOT]                    // [slot]
     sload                           // [owner]
@@ -33,7 +33,7 @@
     return
 }
 
-/// @notice Get the number of consecutive wins
+/// @notice Change the owner of the contract
 /// @param {owner} [address] - The new owner
 #define macro CHANGE_OWNER() = takes (0) returns (0) {
     origin                         // [tx.origin]   
