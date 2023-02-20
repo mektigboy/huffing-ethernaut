@@ -39,7 +39,7 @@ make poc-telephone
 ```sh
 make poc-telephone
 ```
-### Delegation ***
+### Delegation
 
 ```sh
 make poc-delegation
