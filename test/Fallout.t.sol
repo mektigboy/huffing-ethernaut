@@ -9,7 +9,7 @@ import {HuffDeployer} from "foundry-huff/HuffDeployer.sol";
 
 import {IFallout} from "src/interfaces/IFallout.sol";
 
-contract FalloutTest is Test {
+contract Fallout is Test {
     address OWNER = makeAddr("Owner");
 
     address ALICE = makeAddr("Alice");
