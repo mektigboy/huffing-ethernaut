@@ -33,3 +33,5 @@ poc-fallout:; forge clean && forge test --match-contract Fallout -vv
 poc-coinflip:; forge clean && forge test --match-contract CoinFlip -vv
 poc-telephone:; forge clean && forge test --match-contract Telephone -vv
 poc-token:; forge clean && forge test --match-contract Token -vv
+
+poc-force:; forge clean && forge test --match-contract Force -vv
