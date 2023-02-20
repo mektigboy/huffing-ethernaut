@@ -1,0 +1,92 @@
+/// @title Delegate
+/// @notice SPDX-License-Identifier: MIT
+/// @author mektigboy
+
+/////////////////
+/// INTERFACE ///
+/////////////////
+
+#define function owner() view returns (address)
+#define function pwn() nonpayable returns ()
+
+///////////////
+/// STORAGE ///
+///////////////
+
+#define constant OWNER_SLOT = FREE_STORAGE_POINTER()
+
+//////////////////////
+/// CONTRACT LOGIC ///
+//////////////////////
+
+/// @notice Get the owner of the contract
+/// @return {owner} [address] - The owner
+#define macro OWNER() = takes (0) returns (0) {
+    [OWNER_SLOT]                    // [slot]
+    sload                           // [owner]
+    0x00                            // [0, owner]       
+    mstore                          // []
+
+    // Return the owner
+    0x20                            // [32]
+    0x00                            // [0, 32]
+    return
+}
+
+/// @notice Pwn the contract
+/// @dev Sets `msg.sender` as the owner
+#define macro PWN() = takes (0) returns (0) {
+    0x00                            // [0]
+    mload                           // [owner]
+    [OWNER_SLOT]                    // [slot, owner]
+    sstore                          // []
+}
+
+///////////////////
+/// CONSTRUCTOR ///
+///////////////////
+
+/// @notice Constructor
+/// @dev Sets `msg.sender` as the owner
+#define macro CONSTRUCTOR() = takes (0) returns (0) {
+    0x20                            // [size] - Byte size to copy  
+    0x20                            // [offset, size] - Offset in the code to copy from  
+    codesize                        // [size, offset, size] - Byte size of the code
+    sub                             // [size]
+    0x00                            // [0, size] - Offset in memory to copy to
+    codecopy                        // []
+
+    0x00                            // [0]
+    mload                           // [owner]
+    [OWNER_SLOT]                    // [slot, owner]
+    sstore                          // []
+}
+
+////////////////////////
+/// MAIN ENTRY POINT ///
+////////////////////////
+
+/// @notice Main entry point
+#define macro MAIN() = takes (0) returns (0) {
+    // Identify which function is being called
+    0x00                            // [0]
+    calldataload                    // [sig]
+    0xE0                            // [224, sig, 0]
+    shr                             // [sel, 0]
+
+     // Jump to the function depending on the selector
+    dup1 __FUNC_SIG(owner) eq ownerJump jumpi
+    dup1 __FUNC_SIG(pwn) eq pwnJump jumpi
+
+    // Revert if the function is not found
+    0x00                            // [0]
+    0x00                            // [0, 0]
+    revert                          // []
+
+    // Function jump destinations
+    ownerJump:
+        OWNER()
+
+    pwnJump:
+        PWN()
+}
