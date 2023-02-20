@@ -7,7 +7,7 @@
 /////////////////
 
 #define function contributions(address) nonpayable returns (uint256)
-#define function owner() nonpayable returns (address)
+#define function owner() view returns (address)
 #define function contribute() payable returns ()
 #define function getContribution() nonpayable returns (uint256)
 #define function withdraw() nonpayable returns ()

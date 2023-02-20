@@ -9,7 +9,7 @@ import {HuffDeployer} from "foundry-huff/HuffDeployer.sol";
 
 import {IFallback} from "src/interfaces/IFallback.sol";
 
-contract FallbackTest is Test {
+contract Fallback is Test {
     address OWNER = makeAddr("Owner");
 
     address ALICE = makeAddr("Alice");

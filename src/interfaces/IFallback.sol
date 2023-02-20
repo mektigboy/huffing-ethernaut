@@ -7,7 +7,7 @@ pragma solidity ^0.8.0;
 interface IFallback {
     function contributions(address) external returns (uint256);
 
-    function owner() external returns (address);
+    function owner() external view returns (address);
 
     function contribute() external payable;
 
