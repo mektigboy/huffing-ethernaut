@@ -69,7 +69,7 @@
     0x00                            // [0]
     mload                           // [owner]
     dup1                            // [owner, owner]
-    [OWNER_SLOT]                    // [slot, owner]
+    [OWNER_SLOT]                    // [slot, owner
     sstore                          // []
 
     0x04                            // [0]
