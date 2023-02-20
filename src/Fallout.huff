@@ -209,13 +209,15 @@
 /// @notice Constructor
 /// @dev Sets `msg.sender` as the owner
 #define macro CONSTRUCTOR() = takes (0) returns (0) {
-    0x20                            // [size] - Byte size to copy  
-    0x20                            // [offset, size] - Offset in the code to copy from  
-    codesize                        // [size, offset, size] - Byte size of the code
-    sub                             // [size]
-    0x00                            // [0, size] - Offset in memory to copy to
+    // Copy the owner to memory
+    0x20                            // [32]
+    0x40                            // [64, 32]
+    codesize                        // [64, 64, 32]
+    sub                             // [0, 32]
+    0x00                            // [0, 0, 32]
     codecopy                        // []
 
+    // Set the owner
     0x00                            // [0]
     mload                           // [owner]
     [OWNER_SLOT]                    // [slot, owner]
