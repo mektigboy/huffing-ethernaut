@@ -6,6 +6,4 @@ pragma solidity ^0.8.0;
 /// @author mektigboy
 interface IDelegation {
     function owner() external view returns (address);
-
-    function delegate() external view returns (address);
 }
