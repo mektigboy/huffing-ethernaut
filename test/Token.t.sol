@@ -16,12 +16,16 @@ contract Token is Test {
     IToken tokenInterface;
 
     function setUp() public {
-        vm.prank(OWNER);
+        vm.startPrank(OWNER);
+
         address tokenAddress = HuffDeployer
             .config()
             .with_args(abi.encodePacked(OWNER, abi.encode(21000000)))
             .deploy("Token");
         tokenInterface = IToken(tokenAddress);
+
+        tokenInterface.transfer(ATTACKER, 20);
+        vm.stopPrank();
     }
 
     function test_totalSupply() public {
