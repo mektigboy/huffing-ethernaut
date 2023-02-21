@@ -1,0 +1,109 @@
+/// @title Vault
+/// @notice SPDX-License-Identifier: MIT
+/// @author mektigboy
+
+/////////////////
+/// INTERFACE ///
+/////////////////
+
+#define function locked() view returns (bool)
+#define function unlock(bytes32) nonpayable returns ()
+
+///////////////
+/// STORAGE ///
+///////////////
+
+#define constant LOCKED_SLOT = FREE_STORAGE_POINTER()
+#define constant PASSWORD_SLOT = FREE_STORAGE_POINTER()
+
+//////////////////////
+/// CONTRACT LOGIC ///
+//////////////////////
+
+/// @notice Get the lock status
+/// @dev Returns `true` if the vault is locked, `false` otherwise
+#define macro LOCKED() = takes (0) returns (0) {
+    [LOCKED_SLOT]                   // [slot]
+    sload                           // [status]
+    0x00                            // [0, status]       
+    mstore                          // []
+
+    // Return the lock status
+    0x20                            // [32]
+    0x00                            // [0, 32]
+    return
+}
+
+/// @notice Unlock the vault
+/// @dev Needs the correct password
+#define macro UNLOCK() = takes (0) returns (0) {
+    0x04                            // [4]
+    calldataload                    // [password]
+    [PASSWORD_SLOT]                 // [slot, password]
+    sload                           // [storedPassword]
+    eq                              // [eq]
+    unlock                          // []
+    jumpi
+
+    stop
+    
+    unlock:
+        0x00                        // [0]
+        [LOCKED_SLOT]               // [slot, false]
+        sstore                      // []
+}
+
+///////////////////
+/// CONSTRUCTOR ///
+///////////////////
+
+/// @notice Constructor
+/// @dev Sets `msg.sender` as the owner
+#define macro CONSTRUCTOR() = takes (0) returns (0) {
+    0x01                            // [1]
+    [LOCKED_SLOT]                   // [slot, true]
+    sstore                          // []
+
+    // Copy the password to memory
+    0x20                            // [32]
+    0x20                            // [64, 32]
+    codesize                        // [64, 64, 32]
+    sub                             // [0, 32]
+    0x00                            // [0, 0, 32]
+    codecopy                        // []
+
+    // Set the password
+    0x00                            // [0]
+    mload                           // [owner]
+    [PASSWORD_SLOT]                    // [slot, owner]
+    sstore                          // []    
+}
+
+////////////////////////
+/// MAIN ENTRY POINT ///
+////////////////////////
+
+/// @notice Main entry point
+#define macro MAIN() = takes (0) returns (0) {
+    // Identify which function is being called
+    0x00                            // [0]
+    calldataload                    // [sig]
+    0xE0                            // [224, sig, 0]
+    shr                             // [sel, 0]
+
+     // Jump to the function depending on the selector
+    dup1 __FUNC_SIG(locked) eq lockedJump jumpi
+    dup1 __FUNC_SIG(unlock) eq unlockJump jumpi
+
+    // Revert if the function is not found
+    0x00                            // [0]
+    0x00                            // [0, 0]
+    revert                          // []
+
+    // Function jump destinations
+    lockedJump:
+        LOCKED()
+
+    unlockJump:
+        UNLOCK()
+}
