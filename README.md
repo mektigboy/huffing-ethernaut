@@ -51,6 +51,12 @@ make poc-delegation
 make poc-force
 ```
 
+### Vault
+
+```sh
+make poc-force
+```
+
 ## Recommendation
 
 Install [VSCode Huff](https://marketplace.visualstudio.com/items?itemName=huff-language.huff-language) extension.
