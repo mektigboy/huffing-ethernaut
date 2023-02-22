@@ -5,7 +5,7 @@ pragma solidity ^0.8.0;
 /// @notice Interface for Fallback contract
 /// @author mektigboy
 interface IFallback {
-    function contributions(address) external returns (uint256);
+    function contributions(address) external view returns (uint256);
 
     function owner() external view returns (address);
 
