@@ -36,3 +36,4 @@ poc-token:; forge clean && forge test --match-contract Token -vv
 poc-delegate:; forge clean && forge test --match-contract Delegate -vv
 poc-force:; forge clean && forge test --match-contract Force -vv
 poc-vault:; forge clean && forge test --match-contract Vault -vv
+poc-king:; forge clean && forge test --match-contract King -vv
