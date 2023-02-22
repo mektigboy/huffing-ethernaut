@@ -1,0 +1,181 @@
+/// @title King
+/// @notice SPDX-License-Identifier: MIT
+/// @author mektigboy
+
+/////////////////
+/// INTERFACE ///
+/////////////////
+
+#define function prize() view returns (bool)
+#define function owner() view returns (address)
+#define function _king() view returns (address)
+
+///////////////
+/// STORAGE ///
+///////////////
+
+#define constant KING_SLOT = FREE_STORAGE_POINTER()
+#define constant PRIZE_SLOT = FREE_STORAGE_POINTER()
+#define constant OWNER_SLOT = FREE_STORAGE_POINTER()
+
+//////////////////////
+/// CONTRACT LOGIC ///
+//////////////////////
+
+/// @notice Get the prize
+/// @dev {prize} [uint256] - The prize
+#define macro PRIZE() = takes (0) returns (0) {
+    [PRIZE_SLOT]                    // [slot]
+    sload                           // [prize]
+    0x00                            // [0, prize]       
+    mstore                          // []
+
+    // Return the lock status
+    0x20                            // [32]
+    0x00                            // [0, 32]
+    return
+}
+
+/// @notice Get the owner
+/// @dev {owner} [address] - The owner
+#define macro OWNER() = takes (0) returns (0) {
+    [OWNER_SLOT]                    // [slot]
+    sload                           // [owner]
+    0x00                            // [0, owner]       
+    mstore                          // []
+
+    // Return the lock status
+    0x20                            // [32]
+    0x00                            // [0, 32]
+    return
+}
+
+/// @notice Get the king
+/// @dev {king} [address] - The king
+#define macro _KING() = takes (0) returns (0) {
+    [KING_SLOT]                     // [slot]
+    sload                           // [king]
+    0x00                            // [0, king]       
+    mstore                          // []
+
+    // Return the lock status
+    0x20                            // [32]
+    0x00                            // [0, 32]
+    return
+}
+
+///////////////////
+/// CONSTRUCTOR ///
+///////////////////
+
+/// @notice Constructor
+/// @dev Sets `msg.sender` as the owner
+/// @dev Sets `msg.sender` as the king
+/// @dev Sets `msg.value` as the prize
+#define macro CONSTRUCTOR() = takes (0) returns (0) {
+    // Copy the first argument to memory
+    0x20                            // [32]
+    0x40                            // [64, 32]
+    codesize                        // [64, 64, 32]
+    sub                             // [0, 32]
+    0x00                            // [0, 0, 32]
+    codecopy                        // []
+    
+    // Set the owner
+    0x00                            // [0]
+    mload                           // [owner]
+    dup1                            // [owner, owner]
+    [OWNER_SLOT]                    // [slot, owner, owner]
+    sstore                          // [owner]
+   
+    // Set the king
+    [KING_SLOT]                     // [slot, owner]
+    sstore                          // []
+
+    // Copy the second argument to memory
+    0x20                            // [32] 
+    0x20                            // [32, 32]
+    codesize                        // [64, 32, 32]
+    sub                             // [32, 32]
+    0x00                            // [0, 32, 32]
+    codecopy                        // []
+
+    // Set the prize
+    0x00                            // [32]
+    mload                           // [prize]
+    [PRIZE_SLOT]                    // [slot, prize]
+    sstore                          // [prize]
+}
+
+////////////////////////
+/// MAIN ENTRY POINT ///
+////////////////////////
+
+/// @notice Main entry point
+#define macro MAIN() = takes (0) returns (0) {
+    // Identify which function is being called
+    0x00                            // [0]
+    calldataload                    // [sig]
+    0xE0                            // [224, sig, 0]
+    shr                             // [sel, 0]
+
+    // Jump to the function depending on the selector
+    dup1 __FUNC_SIG(prize) eq prizeJump jumpi
+    dup1 __FUNC_SIG(owner) eq ownerJump jumpi
+    dup1 __FUNC_SIG(_king) eq _kingJump jumpi
+
+    // Checkt that `msg.sender` is the owner
+    caller                      // [msg.sender]
+    [OWNER_SLOT]                // [slot, msg.sender]
+    sload                       // [owner]
+    eq                          // [bool]
+    receive                     // []
+    jumpi
+
+    // Check that `msg.value` is equal than the prize
+    callvalue                   // [msg.value]
+    [PRIZE_SLOT]                // [slot, msg.value]
+    sload                       // [prize, msg.value]
+    dup1                        // [prize, prize, msg.value]
+    swap2                       // [msg.value, prize, prize]
+    eq                          // [bool, prize]
+    receive                     // [prize]
+    jumpi
+
+    // Check that `msg.value` is greater than the prize
+    callvalue                   // [msg.value, prize]
+    gt                          // [bool]
+    receive                     // []
+    jumpi
+
+    // Revert if the function is not found
+    0x00                            // [0]
+    0x00                            // [0, 0]
+    revert                          // []
+
+    // Function jump destinations
+    prizeJump:
+        PRIZE()
+
+    ownerJump:
+        OWNER()
+
+    _kingJump:
+        _KING()
+    
+    receive:
+        RECEIVE()
+}
+
+/// @notice Receive function
+#define macro RECEIVE() = {
+    // Set `msg.sender` as the king
+    caller                      // [msg.sender]
+    [KING_SLOT]                 // [slot, msg.sender]
+    sstore                      // []
+
+    // Set `msg.value` as the prize
+    callvalue                   // [msg.value]
+    [PRIZE_SLOT]                // [slot, msg.value]
+    sstore                      // []
+}
