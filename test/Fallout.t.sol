@@ -51,17 +51,13 @@ contract Fallout is Test {
         assertEq(falloutInterface.owner(), OWNER);
     }
 
-    function test_allocations() public {
-        assertEq(falloutInterface.allocations(OWNER), 0);
-    }
-
     function test_allocate() public {
         vm.startPrank(ALICE);
         falloutInterface.allocate{value: 5 ether}();
         falloutInterface.allocate{value: 5 ether}();
         vm.stopPrank();
 
-        assertEq(falloutInterface.allocations(ALICE), 10 ether);
+        assertEq(falloutInterface.allocatorBalance(ALICE), 10 ether);
     }
 
     function test_sendAllocation() public {
@@ -73,7 +69,7 @@ contract Fallout is Test {
         falloutInterface.allocate{value: 10 ether}();
 
         assertEq(address(falloutInterface).balance, 110 ether);
-        assertEq(falloutInterface.allocations(ALICE), 10 ether);
+        assertEq(falloutInterface.allocatorBalance(ALICE), 10 ether);
         assertEq(ALICE.balance, 0 ether);
 
         vm.expectRevert();

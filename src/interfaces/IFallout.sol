@@ -5,8 +5,6 @@ pragma solidity ^0.8.0;
 /// @notice Interface for Fallout contract
 /// @author mektigboy
 interface IFallout {
-    function allocations(address) external returns (uint256);
-
     function owner() external view returns (address);
 
     function Fal1out() external payable;
@@ -17,5 +15,5 @@ interface IFallout {
 
     function collectAllocations() external;
 
-    function allocatorBalance() external view returns (uint256);
+    function allocatorBalance(address) external view returns (uint256);
 }
