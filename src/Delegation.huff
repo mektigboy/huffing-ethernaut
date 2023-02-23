@@ -58,24 +58,24 @@
     0x00                            // [0, 0, 32]
     codecopy                        // []
     
+    // Set the owner
+    0x00                            // [0]
+    mload                           // [owner]
+    [OWNER_SLOT]                    // [slot, owner]
+    sstore                          // []
+
     // Copy the delegate to memory
     0x20                            // [32] 
     0x20                            // [32, 32]
     codesize                        // [64, 32, 32]
     sub                             // [32, 32]
-    0x20                            // [0, 32, 32]
-    codecopy                        
-
-    // Set the owner
-    0x00                            // [0]
-    mload                           // [owner]
-    [OWNER_SLOT]                    // [slot, owner]
-    sstore                          // [owner]
+    0x00                            // [0, 32, 32]
+    codecopy                        // []
 
     // Set the delegate
-    0x20                            // [32]
-    mload                                 
-    [DELEGATE_SLOT]                 // [slot, delegateAddress]
+    0x00                            // [32]
+    mload                           // [delegate]       
+    [DELEGATE_SLOT]                 // [slot, delegate]
     sstore                          // []
 }
 
