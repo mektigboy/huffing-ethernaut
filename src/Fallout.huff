@@ -6,7 +6,6 @@
 /// INTERFACE ///
 /////////////////
 
-#define function allocations(address) nonpayable returns (uint256)
 #define function owner() view returns (address)
 #define function Fal1out() payable returns ()
 #define function allocate() payable returns ()
@@ -85,6 +84,7 @@
 /// @notice Get the owner of the contract
 /// @return {owner} [address] - The owner
 #define macro OWNER() = takes (0) returns (0) {
+    // Load the owner
     [OWNER_SLOT]                    // [slot]
     sload                           // [owner]
     0x00                            // [0, owner]       
@@ -251,9 +251,6 @@
     revert      
 
     // Function jump destinations
-    allocationsJump:
-        ALLOCATIONS()
-
     ownerJump:
         OWNER()
     
