@@ -21,7 +21,7 @@
 //////////////////////
 
 /// @notice Get the lock status
-/// @dev Returns `true` if the vault is locked, `false` otherwise
+/// @dev {status} [bool] - The lock status
 #define macro LOCKED() = takes (0) returns (0) {
     [LOCKED_SLOT]                   // [slot]
     sload                           // [status]
@@ -91,7 +91,7 @@
     0xE0                            // [224, sig, 0]
     shr                             // [sel, 0]
 
-     // Jump to the function depending on the selector
+    // Jump to the function depending on the selector
     dup1 __FUNC_SIG(locked) eq lockedJump jumpi
     dup1 __FUNC_SIG(unlock) eq unlockJump jumpi
 
