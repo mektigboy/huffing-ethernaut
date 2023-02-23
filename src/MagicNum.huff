@@ -1,0 +1,79 @@
+/// @title MagicNumber
+/// @notice SPDX-License-Identifier: MIT
+/// @author mektigboy
+
+/////////////////
+/// INTERFACE ///
+/////////////////
+
+#define function solver() view returns (address)
+#define function setSolver(address) nonpayable returns ()
+
+///////////////
+/// STORAGE ///
+///////////////
+
+#define constant SOLVER_SLOT = FREE_STORAGE_POINTER()
+
+//////////////////////
+/// CONTRACT LOGIC ///
+//////////////////////
+
+/// @notice Get the solver
+/// @return {solver} [address] - The solver
+#define macro SOLVER() = takes (0) returns (0) {
+    // Load the solver
+    [SOLVER_SLOT]                   // [slot]
+    sload                           // [solver]
+    0x00                            // [0, solver]       
+    mstore                          // []
+
+    // Return the solver
+    0x00                            // [0, solver]
+    return                          // []
+}
+
+/// @notice Set the solver
+/// @param {solver} [address] - The solver
+#define macro SET_SOLVER() = takes (0) returns (0) {
+    // Set the new solver
+    0x04                            // [4]
+    calldataload                    // [key]
+    [SOLVER_SLOT]                   // [key, slot]
+    sstore                          // []
+
+    stop
+}
+
+////////////////////////
+/// MAIN ENTRY POINT ///
+////////////////////////
+
+/// @notice Main entry point
+#define macro MAIN() = takes (0) returns (0) {
+    // Identify which function is being called
+    0x00                            // [0]
+    calldataload                    // [sig]
+    0xE0                            // [224, sig, 0]
+    shr                             // [sel, 0]
+
+    // Jump to the function depending on the selector
+    dup1 __FUNC_SIG(solver) eq solverJump jumpi
+    dup1 __FUNC_SIG(setSolver) eq setSolverJump jumpi
+
+    // Revert if the function is not found
+    0x00                            // [0]
+    0x00                            // [0, 0]
+    revert                          // []
+
+    // Function jump destinations
+    solverJump:
+        SOLVER()
+
+    setSolverJump:
+        SET_SOLVER()
+}
+
+//////////
+/// 42 ///
+//////////
