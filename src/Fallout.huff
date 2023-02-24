@@ -11,7 +11,7 @@
 #define function allocate() payable returns ()
 #define function sendAllocation(address) nonpayable returns ()
 #define function collectAllocations() nonpayable returns ()
-#define function allocatorBalance() view returns (uint256)
+#define function allocatorBalance(address) view returns (uint256)
 
 ///////////////
 /// STORAGE ///
@@ -26,6 +26,7 @@
 /// @notice Modifier to check if the caller is the owner
 /// @dev Reverts if the caller is not the owner
 #define macro ONLY_OWNER() = takes (0) returns (0) {
+    // Check if the caller is the owner
     caller                          // [msg.sender]
     [OWNER_SLOT]                    // [slot, msg.sender]
     sload                           // [owner, msg.sender]
@@ -64,23 +65,6 @@
 /// CONTRACT LOGIC ///
 ////////////////////// 
 
-/// @notice Get the allocation of an address
-/// @param {key} [bytes32] - The key
-/// @return {allocation} [uint256] - The allocation
-#define macro ALLOCATIONS() = takes (0) returns (0) {
-    0x04                            // [4]
-    calldataload                    // [key]
-    GET_SLOT_FROM_KEY(0x00)         // [slot, key]
-    sload                           // [contribution]
-    0x00                            // [0, contribution]
-    mstore                          // []
-
-    // Return the contribution
-    0x20                            // [32]
-    0x00                            // [0, 32]
-    return
-}
-
 /// @notice Get the owner of the contract
 /// @return {owner} [address] - The owner
 #define macro OWNER() = takes (0) returns (0) {
@@ -99,10 +83,12 @@
 /// @notice Fal1out function that is being used as the constructor
 /// @dev Sets the owner of the contract to `msg.sender`
 #define macro FAL1OUT() = takes (0) returns (0) {
+    // Set the owner
     caller                          // [msg.sender]
     [OWNER_SLOT]                    // [slot, msg.sender]
     sstore                          // []
 
+    // Set the allocation of owner
     callvalue                       // [msg.value]
     caller                          // [msg.sender, msg.value]
     GET_SLOT_FROM_KEY(0x00)         // [slot, msg.value]     
@@ -162,8 +148,10 @@
 /// @notice Collect all allocations
 /// @dev Reverts if the caller is not the owner
 #define macro COLLECT_ALLOCATIONS() = takes (0) returns (0) {
+    // Check if the caller is the owner
     ONLY_OWNER()
 
+    // Collect all allocations
     0x00                            // [0]
     0x00                            // [0, 0]
     0x00                            // [0, 0, 0]
@@ -211,8 +199,8 @@
 #define macro CONSTRUCTOR() = takes (0) returns (0) {
     // Copy the owner to memory
     0x20                            // [32]
-    0x40                            // [64, 32]
-    codesize                        // [64, 64, 32]
+    0x20                            // [32, 32]
+    codesize                        // [32, 32, 32]
     sub                             // [0, 32]
     0x00                            // [0, 0, 32]
     codecopy                        // []
@@ -237,7 +225,6 @@
     shr                             // [sel, 0]
 
     // Jump to the function depending on the selector
-    dup1 __FUNC_SIG(allocations) eq allocationsJump jumpi
     dup1 __FUNC_SIG(owner) eq ownerJump jumpi
     dup1 __FUNC_SIG(Fal1out) eq Fal1outJump jumpi
     dup1 __FUNC_SIG(allocate) eq allocateJump jumpi
