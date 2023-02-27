@@ -22,6 +22,7 @@
 /// @notice Get the owner of the contract
 /// @return {owner} [address] - The owner
 #define macro OWNER() = takes (0) returns (0) {
+    // Load the owner
     [OWNER_SLOT]                    // [slot]
     sload                           // [owner]
     0x00                            // [0, owner]       
@@ -36,12 +37,14 @@
 /// @notice Change the owner of the contract
 /// @param {owner} [address] - The new owner
 #define macro CHANGE_OWNER() = takes (0) returns (0) {
+    // Check that the `msg.sender` is equal to `tx.origin`
     origin                         // [tx.origin]   
     caller                         // [tx.origin, msg.sender]
     eq                             // [tx.origin == msg.sender]
     is_equal
     jumpi
 
+    // Set the owner
     0x04                            // [4]
     calldataload                    // [owner]
     [OWNER_SLOT]                    // [slot, owner]
@@ -64,7 +67,7 @@
 #define macro CONSTRUCTOR() = takes (0) returns (0) {
     // Copy the owner to memory
     0x20                            // [32]
-    0x40                            // [64, 32]
+    0x20                            // [64, 32]
     codesize                        // [64, 64, 32]
     sub                             // [0, 32]
     0x00                            // [0, 0, 32]
