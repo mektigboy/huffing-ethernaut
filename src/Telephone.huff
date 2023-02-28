@@ -39,8 +39,8 @@
 #define macro CHANGE_OWNER() = takes (0) returns (0) {
     // Check that the `msg.sender` is equal to `tx.origin`
     origin                         // [tx.origin]   
-    caller                         // [tx.origin, msg.sender]
-    eq                             // [tx.origin == msg.sender]
+    caller                         // [msg.sender, tx.origin]
+    eq                             // [msg.sender == tx.origin]
     is_equal
     jumpi
 
